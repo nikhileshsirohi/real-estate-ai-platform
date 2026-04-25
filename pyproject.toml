@@ -1,0 +1,5 @@
+[project]
+name = "real-estate-ai-platform"
+version = "0.1.0"
+description = "AI-powered real estate price intelligence and advisory platform"
+requires-python = ">=3.10"

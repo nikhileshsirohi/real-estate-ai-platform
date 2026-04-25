@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+
+# Environment files
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ML artifacts
+mlruns/
+models/*.pkl
+models/*.joblib
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
+
+# Test/cache
+.pytest_cache/
+.coverage
