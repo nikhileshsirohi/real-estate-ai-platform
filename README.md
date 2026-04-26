@@ -240,3 +240,34 @@ Keep notebook work separated by purpose:
 - `notebooks/01_eda.ipynb`: data understanding and skew/outlier analysis
 - `notebooks/02_model_comparison.ipynb`: baseline model comparison
 - `notebooks/03_tuned_xgboost.ipynb`: XGBoost tuning and best-model export
+
+## RAG Starter
+The project now includes a starter local knowledge corpus built from official California sources so you can begin RAG work without a private dataset.
+
+Starter source documents live in:
+- `data/knowledge/raw`
+
+Initial official sources used:
+- U.S. Census QuickFacts California
+- California Department of Finance population and housing estimates
+- California Department of Finance population projections
+
+Build the local vector index:
+
+```bash
+python -m src.rag.build_index
+```
+
+Run a simple retrieval test:
+
+```bash
+python -m src.rag.retrieve
+```
+
+Core RAG files:
+- `configs/rag_config.yaml`
+- `src/rag/document_loader.py`
+- `src/rag/chunking.py`
+- `src/rag/embeddings.py`
+- `src/rag/build_index.py`
+- `src/rag/retrieve.py`

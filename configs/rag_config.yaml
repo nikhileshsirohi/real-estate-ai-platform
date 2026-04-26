@@ -1,0 +1,6 @@
+embedding_model_name: sentence-transformers/all-MiniLM-L6-v2
+knowledge_raw_dir: data/knowledge/raw
+index_output_dir: data/knowledge/index
+chunk_size: 600
+chunk_overlap: 120
+top_k: 5

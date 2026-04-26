@@ -12,6 +12,8 @@ psycopg2-binary
 pydantic
 python-dotenv
 pyyaml
+sentence-transformers
+faiss-cpu
 matplotlib
 seaborn
 pytest
