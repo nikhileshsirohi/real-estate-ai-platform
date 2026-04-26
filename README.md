@@ -107,6 +107,12 @@ Health check:
 curl http://127.0.0.1:8000/health
 ```
 
+Root API summary:
+
+```bash
+curl http://127.0.0.1:8000/
+```
+
 Prediction history:
 
 ```bash
@@ -144,6 +150,9 @@ Table name:
 
 History endpoint:
 - `GET /predictions?limit=10`
+- `GET /predictions/{id}`
+- `GET /predictions?limit=10&model_name=xgboost`
+- `GET /predictions?limit=10&min_predicted_price=3.0&max_predicted_price=5.0`
 
 ## Observability
 The API now emits structured JSON logs for:
@@ -178,6 +187,8 @@ This starts:
 - `api` on `http://127.0.0.1:8000`
 - `db` on `localhost:5432`
 
+The Docker image disables Uvicorn's default access log so the structured JSON application logs are easier to read.
+
 Inside Docker, the API uses:
 
 ```env
@@ -193,6 +204,36 @@ docker compose down -v
 ```
 
 Use `docker compose down -v` only if you want to remove the Postgres volume and reset stored prediction history.
+
+## Alembic Migrations
+Use Alembic for production-style schema management.
+
+Create or upgrade the database schema:
+
+```bash
+alembic upgrade head
+```
+
+Create a new migration later:
+
+```bash
+alembic revision -m "describe_change"
+```
+
+For local convenience, the API can still auto-create tables on startup. To disable that and rely only on migrations:
+
+```env
+AUTO_CREATE_TABLES=false
+```
+
+## CI/CD
+A minimal GitHub Actions workflow is included at:
+- `.github/workflows/ci.yml`
+
+It currently:
+- installs dependencies
+- runs `pytest`
+- builds the Docker image
 
 ## Notebooks
 Keep notebook work separated by purpose:

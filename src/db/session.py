@@ -17,6 +17,7 @@ DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql+psycopg2://localhost:5432/real_estate_db",
 )
+AUTO_CREATE_TABLES = os.getenv("AUTO_CREATE_TABLES", "true").lower() == "true"
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, class_=Session)

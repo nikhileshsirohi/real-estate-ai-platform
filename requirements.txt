@@ -7,6 +7,7 @@ joblib
 xgboost
 mlflow
 sqlalchemy
+alembic
 psycopg2-binary
 pydantic
 python-dotenv

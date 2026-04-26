@@ -40,3 +40,7 @@ class PredictionHistoryItem(BaseModel):
 class PredictionHistoryResponse(BaseModel):
     items: list[PredictionHistoryItem]
     count: int
+
+
+class PredictionDetailResponse(PredictionHistoryItem):
+    """Detailed response for a single stored prediction."""

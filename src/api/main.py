@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi import Request
 
 from src.api.routes import router
-from src.db.session import create_db_tables
+from src.db.session import AUTO_CREATE_TABLES, create_db_tables
 from src.utils.logger import get_logger, log_event, setup_logging
 
 
@@ -24,8 +24,9 @@ app = FastAPI(
 @app.on_event("startup")
 def on_startup() -> None:
     """Create database tables on application startup."""
-    create_db_tables()
-    log_event(logger, 20, "application_startup", event="startup")
+    if AUTO_CREATE_TABLES:
+        create_db_tables()
+    log_event(logger, 20, "application_startup", event="startup", auto_create_tables=AUTO_CREATE_TABLES)
 
 
 @app.middleware("http")

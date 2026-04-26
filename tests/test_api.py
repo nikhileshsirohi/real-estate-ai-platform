@@ -61,6 +61,9 @@ class DummySession:
     def all(self) -> list[SimpleNamespace]:
         return self.records
 
+    def scalar(self, _stmt: object):
+        return self.records[0]
+
     def close(self) -> None:
         return None
 
@@ -74,6 +77,16 @@ app.dependency_overrides[get_db] = override_get_db
 
 
 client = TestClient(app)
+
+
+def test_root_returns_api_summary() -> None:
+    response = client.get("/")
+
+    assert response.status_code == 200
+    response_body = response.json()
+    assert response_body["docs"] == "/docs"
+    assert response_body["health"] == "/health"
+    assert response_body["predictions"] == "/predictions?limit=10"
 
 
 def test_health_check_returns_ok() -> None:
@@ -92,6 +105,23 @@ def test_list_predictions_returns_history() -> None:
     assert len(response_body["items"]) == 2
     assert response_body["items"][0]["model_name"] == "xgboost"
     assert response_body["items"][0]["id"] == 2
+
+
+def test_list_predictions_supports_filters() -> None:
+    response = client.get("/predictions?limit=2&model_name=xgboost&min_predicted_price=3.0")
+
+    assert response.status_code == 200
+    response_body = response.json()
+    assert response_body["count"] == 2
+
+
+def test_get_prediction_detail_returns_item() -> None:
+    response = client.get("/predictions/2")
+
+    assert response.status_code == 200
+    response_body = response.json()
+    assert response_body["id"] == 2
+    assert response_body["model_name"] == "xgboost"
 
 
 def test_predict_price_returns_prediction() -> None:
