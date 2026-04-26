@@ -1,5 +1,7 @@
 """Request and response schemas for the prediction API."""
 
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -18,3 +20,23 @@ class PricePredictionResponse(BaseModel):
     predicted_price: float
     model_name: str
     prediction_id: int | None = None
+
+
+class PredictionHistoryItem(BaseModel):
+    id: int
+    model_name: str
+    predicted_price: float
+    median_income: float
+    house_age: float
+    average_rooms: float
+    average_bedrooms: float
+    population: float
+    average_occupancy: float
+    latitude: float
+    longitude: float
+    created_at: datetime
+
+
+class PredictionHistoryResponse(BaseModel):
+    items: list[PredictionHistoryItem]
+    count: int

@@ -1,5 +1,6 @@
 """Repository helpers for prediction persistence."""
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.api.schemas import PricePredictionRequest
@@ -29,3 +30,13 @@ def save_prediction_record(
     db.commit()
     db.refresh(record)
     return record
+
+
+def list_recent_prediction_records(db: Session, limit: int = 20) -> list[PredictionRecord]:
+    """Fetch recent prediction records ordered from newest to oldest."""
+    stmt = (
+        select(PredictionRecord)
+        .order_by(PredictionRecord.id.desc())
+        .limit(limit)
+    )
+    return list(db.scalars(stmt).all())

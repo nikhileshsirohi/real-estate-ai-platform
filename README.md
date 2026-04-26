@@ -107,6 +107,12 @@ Health check:
 curl http://127.0.0.1:8000/health
 ```
 
+Prediction history:
+
+```bash
+curl "http://127.0.0.1:8000/predictions?limit=10"
+```
+
 Prediction request:
 
 ```bash
@@ -135,6 +141,9 @@ Each `/predict-price` request is stored in PostgreSQL with:
 
 Table name:
 - `prediction_records`
+
+History endpoint:
+- `GET /predictions?limit=10`
 
 ## Next Improvement Ideas
 - Add a dedicated PostgreSQL prediction log

@@ -1,6 +1,8 @@
 """Tests for API endpoints."""
 
 from collections.abc import Generator
+from datetime import datetime, timezone
+from types import SimpleNamespace
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -12,6 +14,38 @@ from src.api.routes import get_db
 class DummySession:
     """Minimal stand-in session for API tests."""
 
+    def __init__(self) -> None:
+        self.records = [
+            SimpleNamespace(
+                id=2,
+                model_name="xgboost",
+                predicted_price=3.95,
+                median_income=8.32,
+                house_age=41.0,
+                average_rooms=6.98,
+                average_bedrooms=1.02,
+                population=322.0,
+                average_occupancy=2.55,
+                latitude=37.88,
+                longitude=-122.23,
+                created_at=datetime(2026, 4, 26, 12, 0, tzinfo=timezone.utc),
+            ),
+            SimpleNamespace(
+                id=1,
+                model_name="xgboost",
+                predicted_price=4.10,
+                median_income=9.10,
+                house_age=20.0,
+                average_rooms=7.50,
+                average_bedrooms=1.10,
+                population=500.0,
+                average_occupancy=2.80,
+                latitude=37.70,
+                longitude=-122.10,
+                created_at=datetime(2026, 4, 26, 11, 30, tzinfo=timezone.utc),
+            ),
+        ]
+
     def add(self, _record: object) -> None:
         return None
 
@@ -20,6 +54,12 @@ class DummySession:
 
     def refresh(self, record: object) -> None:
         setattr(record, "id", 1)
+
+    def scalars(self, _stmt: object) -> "DummySession":
+        return self
+
+    def all(self) -> list[SimpleNamespace]:
+        return self.records
 
     def close(self) -> None:
         return None
@@ -41,6 +81,17 @@ def test_health_check_returns_ok() -> None:
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_list_predictions_returns_history() -> None:
+    response = client.get("/predictions?limit=2")
+
+    assert response.status_code == 200
+    response_body = response.json()
+    assert response_body["count"] == 2
+    assert len(response_body["items"]) == 2
+    assert response_body["items"][0]["model_name"] == "xgboost"
+    assert response_body["items"][0]["id"] == 2
 
 
 def test_predict_price_returns_prediction() -> None:
