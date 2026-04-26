@@ -1,0 +1,12 @@
+[
+  "median_income",
+  "house_age",
+  "average_rooms",
+  "average_bedrooms",
+  "population",
+  "average_occupancy",
+  "latitude",
+  "longitude",
+  "bedroom_ratio",
+  "rooms_per_person"
+]
