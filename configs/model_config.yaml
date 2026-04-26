@@ -1,1 +1,5 @@
-# Model configuration will be added in later steps.
+experiment_name: real_estate_baseline
+model_name: linear_regression
+test_size: 0.2
+random_state: 42
+tracking_uri: http://127.0.0.1:5000
