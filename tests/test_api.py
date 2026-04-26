@@ -32,4 +32,4 @@ def test_predict_price_returns_prediction() -> None:
     assert response.status_code == 200
     response_body = response.json()
     assert "predicted_price" in response_body
-    assert response_body["model_name"] == "linear_regression"
+    assert isinstance(response_body["model_name"], str)

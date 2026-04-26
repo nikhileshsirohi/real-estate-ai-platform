@@ -1,9 +1,9 @@
 """API route definitions."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from src.api.schemas import PricePredictionRequest, PricePredictionResponse
-from src.inference.predictor import predict_price
+from src.inference.predictor import load_model_name, predict_price
 
 
 router = APIRouter()
@@ -18,8 +18,14 @@ def health_check() -> dict[str, str]:
 @router.post("/predict-price", response_model=PricePredictionResponse)
 def predict_price_route(payload: PricePredictionRequest) -> PricePredictionResponse:
     """Predict a median house value from request features."""
-    prediction = predict_price(payload.model_dump())
+    try:
+        prediction = predict_price(payload.model_dump())
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {exc}")
+    
     return PricePredictionResponse(
         predicted_price=prediction,
-        model_name="linear_regression",
+        model_name=load_model_name(),
     )

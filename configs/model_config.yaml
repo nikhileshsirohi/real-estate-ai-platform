@@ -1,5 +1,10 @@
 experiment_name: real_estate_baseline
-model_name: linear_regression
+model_name: random_forest
 test_size: 0.2
 random_state: 42
 tracking_uri: http://127.0.0.1:5000
+random_forest:
+  n_estimators: 200
+  max_depth: 16
+  min_samples_split: 4
+  min_samples_leaf: 2
