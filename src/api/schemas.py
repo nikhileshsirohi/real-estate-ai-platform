@@ -17,3 +17,4 @@ class PricePredictionRequest(BaseModel):
 class PricePredictionResponse(BaseModel):
     predicted_price: float
     model_name: str
+    prediction_id: int | None = None

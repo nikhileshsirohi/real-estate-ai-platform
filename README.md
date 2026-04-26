@@ -28,6 +28,22 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## PostgreSQL 14 Local Setup
+If you are using Homebrew PostgreSQL 14 on macOS:
+
+```bash
+brew services start postgresql@14
+createdb real_estate_db
+```
+
+Create a local `.env` file from [.env.example](/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/.env.example) and set your macOS username in `DATABASE_URL`.
+
+Example:
+
+```env
+DATABASE_URL=postgresql+psycopg2://YOUR_MAC_USERNAME@localhost:5432/real_estate_db
+```
+
 ## Data Pipeline
 ```bash
 python -m src.data.ingestion
@@ -83,6 +99,8 @@ Start the API:
 uvicorn src.api.main:app --reload
 ```
 
+Make sure PostgreSQL is running and `DATABASE_URL` is set in your environment or `.env`.
+
 Health check:
 
 ```bash
@@ -105,6 +123,18 @@ curl -X POST "http://127.0.0.1:8000/predict-price" \
     "longitude": -122.23
   }'
 ```
+
+Successful responses now include a saved `prediction_id` from PostgreSQL.
+
+## Prediction Logging
+Each `/predict-price` request is stored in PostgreSQL with:
+- input property features
+- predicted price
+- model name
+- creation timestamp
+
+Table name:
+- `prediction_records`
 
 ## Next Improvement Ideas
 - Add a dedicated PostgreSQL prediction log

@@ -1,8 +1,36 @@
 """Tests for API endpoints."""
 
+from collections.abc import Generator
+
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
 from src.api.main import app
+from src.api.routes import get_db
+
+
+class DummySession:
+    """Minimal stand-in session for API tests."""
+
+    def add(self, _record: object) -> None:
+        return None
+
+    def commit(self) -> None:
+        return None
+
+    def refresh(self, record: object) -> None:
+        setattr(record, "id", 1)
+
+    def close(self) -> None:
+        return None
+
+
+def override_get_db() -> Generator[Session, None, None]:
+    """Provide a fake database session for tests."""
+    yield DummySession()  # type: ignore[misc]
+
+
+app.dependency_overrides[get_db] = override_get_db
 
 
 client = TestClient(app)
@@ -33,3 +61,4 @@ def test_predict_price_returns_prediction() -> None:
     response_body = response.json()
     assert "predicted_price" in response_body
     assert isinstance(response_body["model_name"], str)
+    assert response_body["prediction_id"] == 1
