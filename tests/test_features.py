@@ -3,8 +3,12 @@
 import pandas as pd
 
 from src.features.feature_engineering import (
+    CAP_QUANTILE,
+    FEATURE_METADATA_PATH,
     TARGET_COLUMN,
+    compute_clip_thresholds,
     create_engineered_features,
+    save_feature_metadata,
     split_features_and_target,
 )
 
@@ -58,3 +62,38 @@ def test_create_engineered_features_adds_capped_and_log_features() -> None:
     assert (feature_df["log_average_rooms"] > 0).all()
     assert (feature_df["population_capped"] <= feature_df["population"]).all()
     assert (feature_df["average_occupancy_capped"] <= feature_df["average_occupancy"]).all()
+
+
+def test_compute_clip_thresholds_returns_expected_keys() -> None:
+    cleaned_df = pd.DataFrame(
+        {
+            "median_income": [8.3, 7.1, 6.2],
+            "house_age": [41.0, 20.0, 30.0],
+            "average_rooms": [6.9, 7.2, 8.5],
+            "average_bedrooms": [1.0, 1.1, 1.2],
+            "population": [322.0, 1200.0, 5000.0],
+            "average_occupancy": [2.5, 3.0, 10.0],
+            "latitude": [37.88, 37.2, 36.7],
+            "longitude": [-122.23, -121.8, -119.5],
+            "median_house_value": [4.526, 3.5, 2.7],
+            "rooms_per_person": [2.7, 2.4, 0.85],
+        }
+    )
+
+    clip_thresholds = compute_clip_thresholds(cleaned_df)
+
+    assert "population" in clip_thresholds
+    assert "average_occupancy" in clip_thresholds
+    assert "rooms_per_person" in clip_thresholds
+
+
+def test_save_feature_metadata_writes_expected_file(tmp_path) -> None:
+    output_path = tmp_path / FEATURE_METADATA_PATH.name
+    clip_thresholds = {"population": 1000.0}
+
+    save_feature_metadata(clip_thresholds, output_path)
+
+    saved_text = output_path.read_text(encoding="utf-8")
+
+    assert '"cap_quantile": 0.99' in saved_text
+    assert '"population": 1000.0' in saved_text

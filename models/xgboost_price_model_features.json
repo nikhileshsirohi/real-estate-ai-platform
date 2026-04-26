@@ -1,16 +1,33 @@
-[
+{
+  "model_name": "xgboost",
+  "feature_columns": [
     "median_income",
     "house_age",
+    "average_rooms",
+    "average_bedrooms",
+    "population",
+    "average_occupancy",
     "latitude",
     "longitude",
     "bedroom_ratio",
-    "average_rooms_capped",
-    "average_bedrooms_capped",
-    "average_occupancy_capped",
-    "rooms_per_person_capped",
-    "population_capped",
+    "rooms_per_person",
     "log_population",
-    "log_average_rooms",
+    "population_capped",
     "log_average_occupancy",
-    "log_rooms_per_person"
-]
+    "average_occupancy_capped",
+    "log_average_rooms",
+    "average_rooms_capped",
+    "log_average_bedrooms",
+    "average_bedrooms_capped",
+    "log_rooms_per_person",
+    "rooms_per_person_capped"
+  ],
+  "clip_thresholds": {
+    "population": 5805.830000000002,
+    "average_occupancy": 5.394812032520327,
+    "average_rooms": 10.357033023735813,
+    "average_bedrooms": 2.127540822838997,
+    "rooms_per_person": 4.320205066800248
+  },
+  "feature_metadata_path": "../data/processed/california_housing_feature_metadata.json"
+}

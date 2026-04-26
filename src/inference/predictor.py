@@ -8,9 +8,8 @@ import joblib
 import numpy as np
 import pandas as pd
 
-
-MODEL_PATH = Path("models/trained_model.joblib")
-MODEL_METADATA_PATH = Path("models/model_metadata.json")
+MODEL_PATH = Path("models/xgboost_price_model_tuned_clean.joblib")
+MODEL_METADATA_PATH = Path("models/xgboost_price_model_features.json")
 
 
 def load_trained_model(model_path: Path = MODEL_PATH) -> Any:
@@ -55,11 +54,25 @@ def create_inference_features(input_data: dict[str, float]) -> dict[str, float]:
     features["log_average_rooms"] = float(np.log1p(features["average_rooms"]))
     features["log_average_bedrooms"] = float(np.log1p(features["average_bedrooms"]))
     features["log_rooms_per_person"] = float(np.log1p(features["rooms_per_person"]))
-    features["population_capped"] = features["population"]
-    features["average_occupancy_capped"] = features["average_occupancy"]
-    features["average_rooms_capped"] = features["average_rooms"]
-    features["average_bedrooms_capped"] = features["average_bedrooms"]
-    features["rooms_per_person_capped"] = features["rooms_per_person"]
+    model_metadata = load_model_metadata()
+    clip_thresholds = model_metadata.get("clip_thresholds", {})
+    features["population_capped"] = min(features["population"], float(clip_thresholds.get("population", features["population"])))
+    features["average_occupancy_capped"] = min(
+        features["average_occupancy"],
+        float(clip_thresholds.get("average_occupancy", features["average_occupancy"])),
+    )
+    features["average_rooms_capped"] = min(
+        features["average_rooms"],
+        float(clip_thresholds.get("average_rooms", features["average_rooms"])),
+    )
+    features["average_bedrooms_capped"] = min(
+        features["average_bedrooms"],
+        float(clip_thresholds.get("average_bedrooms", features["average_bedrooms"])),
+    )
+    features["rooms_per_person_capped"] = min(
+        features["rooms_per_person"],
+        float(clip_thresholds.get("rooms_per_person", features["rooms_per_person"])),
+    )
     return features
 
 

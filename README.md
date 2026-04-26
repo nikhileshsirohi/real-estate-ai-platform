@@ -6,8 +6,8 @@ Production-style AI/ML project for real estate price prediction and advisory.
 ## Current Scope
 - Data ingestion from a real housing dataset
 - Data cleaning
-- Feature engineering
-- Configurable model training
+- feature engineering with log/capped transforms
+- tuned XGBoost model training
 - MLflow experiment tracking
 - Local model artifact saving
 - FastAPI prediction endpoint
@@ -40,6 +40,7 @@ Current feature engineering adds:
 - `rooms_per_person`
 - log-transformed versions of skewed columns
 - capped versions of skewed columns using the 99th percentile from the training dataset
+- saved feature-engineering metadata for consistent inference
 
 ## Training
 Choose the model in [configs/model_config.yaml](/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/configs/model_config.yaml).
@@ -49,6 +50,21 @@ Supported values:
 - `random_forest`
 - `xgboost`
 
+Current best tuned XGBoost params:
+
+```json
+{
+  "subsample": 1.0,
+  "reg_lambda": 3,
+  "reg_alpha": 1,
+  "n_estimators": 900,
+  "min_child_weight": 7,
+  "max_depth": 5,
+  "learning_rate": 0.07,
+  "colsample_bytree": 0.7
+}
+```
+
 Run training:
 
 ```bash
@@ -56,8 +72,9 @@ python -m src.training.train_model
 ```
 
 Saved artifacts:
-- `models/trained_model.joblib`
-- `models/model_metadata.json`
+- `models/xgboost_price_model_tuned_clean.joblib`
+- `models/xgboost_price_model_features.json`
+- `models/xgboost_price_model_metrics.json`
 
 ## API
 Start the API:
@@ -90,7 +107,13 @@ curl -X POST "http://127.0.0.1:8000/predict-price" \
 ```
 
 ## Next Improvement Ideas
-- Compare `linear_regression` vs `random_forest` vs `xgboost` in MLflow
+- Add a dedicated PostgreSQL prediction log
+- Add geospatial features or neighborhood clustering
 - Try stricter clipping or additional geo features if XGBoost plateaus
-- Store prediction history in PostgreSQL
 - Package the app with Docker
+
+## Notebooks
+Keep notebook work separated by purpose:
+- `notebooks/01_eda.ipynb`: data understanding and skew/outlier analysis
+- `notebooks/02_model_comparison.ipynb`: baseline model comparison
+- `notebooks/03_tuned_xgboost.ipynb`: XGBoost tuning and best-model export

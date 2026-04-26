@@ -1,0 +1,10 @@
+{
+  "cap_quantile": 0.99,
+  "clip_thresholds": {
+    "population": 5805.830000000002,
+    "average_occupancy": 5.394812032520327,
+    "average_rooms": 10.357033023735813,
+    "average_bedrooms": 2.127540822838997,
+    "rooms_per_person": 4.320205066800248
+  }
+}
