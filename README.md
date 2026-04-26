@@ -145,6 +145,22 @@ Table name:
 History endpoint:
 - `GET /predictions?limit=10`
 
+## Observability
+The API now emits structured JSON logs for:
+- application startup
+- every HTTP request
+- prediction creation events
+- prediction history fetches
+- prediction/database failures
+
+Typical logged fields include:
+- `method`
+- `path`
+- `status_code`
+- `duration_ms`
+- `prediction_id`
+- `model_name`
+
 ## Next Improvement Ideas
 - Add a dedicated PostgreSQL prediction log
 - Add geospatial features or neighborhood clustering

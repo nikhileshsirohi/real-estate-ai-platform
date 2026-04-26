@@ -1,5 +1,7 @@
 """API route definitions."""
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -13,9 +15,11 @@ from src.api.schemas import (
 from src.db.repository import list_recent_prediction_records, save_prediction_record
 from src.db.session import get_db
 from src.inference.predictor import load_model_name, predict_price
+from src.utils.logger import get_logger, log_event
 
 
 router = APIRouter()
+logger = get_logger(__name__)
 
 
 @router.get("/health")
@@ -33,6 +37,7 @@ def list_predictions_route(
     try:
         records = list_recent_prediction_records(db=db, limit=limit)
     except SQLAlchemyError as exc:
+        log_event(logger, logging.ERROR, "prediction_history_failed", limit=limit, error=str(exc))
         raise HTTPException(status_code=500, detail=f"Database read failed: {exc}")
 
     items = [
@@ -52,6 +57,7 @@ def list_predictions_route(
         )
         for record in records
     ]
+    log_event(logger, logging.INFO, "prediction_history_fetched", limit=limit, count=len(items))
     return PredictionHistoryResponse(items=items, count=len(items))
 
 
@@ -71,11 +77,23 @@ def predict_price_route(
             model_name=model_name,
         )
     except FileNotFoundError as exc:
+        log_event(logger, logging.ERROR, "prediction_failed_missing_file", error=str(exc))
         raise HTTPException(status_code=500, detail=str(exc))
     except SQLAlchemyError as exc:
+        log_event(logger, logging.ERROR, "prediction_failed_database", error=str(exc))
         raise HTTPException(status_code=500, detail=f"Database logging failed: {exc}")
     except Exception as exc:
+        log_event(logger, logging.ERROR, "prediction_failed_runtime", error=str(exc))
         raise HTTPException(status_code=500, detail=f"Prediction failed: {exc}")
+
+    log_event(
+        logger,
+        logging.INFO,
+        "prediction_created",
+        prediction_id=saved_record.id,
+        model_name=model_name,
+        predicted_price=prediction,
+    )
 
     return PricePredictionResponse(
         predicted_price=prediction,
