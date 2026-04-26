@@ -41,6 +41,7 @@ Choose the model in [configs/model_config.yaml](/Volumes/NIKHILESH/Projects/real
 Supported values:
 - `linear_regression`
 - `random_forest`
+- `xgboost`
 
 Run training:
 
@@ -83,7 +84,6 @@ curl -X POST "http://127.0.0.1:8000/predict-price" \
 ```
 
 ## Next Improvement Ideas
-- Compare `linear_regression` vs `random_forest` in MLflow
-- Add XGBoost after the tree baseline is stable
+- Compare `linear_regression` vs `random_forest` vs `xgboost` in MLflow
 - Store prediction history in PostgreSQL
 - Package the app with Docker

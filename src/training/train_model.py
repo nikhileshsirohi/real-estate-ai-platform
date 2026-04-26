@@ -12,6 +12,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
+from xgboost import XGBRegressor
 
 from src.features.feature_engineering import TARGET_COLUMN, split_features_and_target
 from src.training.evaluate import evaluate_regression_model
@@ -69,13 +70,41 @@ def build_model(model_name: str, model_config: dict[str, Any], random_state: int
             n_jobs=-1,
         )
 
+    if model_name == "xgboost":
+        xgboost_config = model_config.get("xgboost", {})
+        return XGBRegressor(
+            n_estimators=int(xgboost_config.get("n_estimators", 400)),
+            max_depth=int(xgboost_config.get("max_depth", 6)),
+            learning_rate=float(xgboost_config.get("learning_rate", 0.05)),
+            subsample=float(xgboost_config.get("subsample", 0.9)),
+            colsample_bytree=float(xgboost_config.get("colsample_bytree", 0.9)),
+            reg_alpha=float(xgboost_config.get("reg_alpha", 0.0)),
+            reg_lambda=float(xgboost_config.get("reg_lambda", 1.0)),
+            objective="reg:squarederror",
+            random_state=random_state,
+            n_jobs=-1,
+        )
+
     raise ValueError(f"Unsupported model_name: {model_name}")
 
 
 def extract_model_params(model_name: str, model_config: dict[str, Any], random_state: int) -> dict[str, Any]:
     """Return the model-specific parameters that should be logged."""
     if model_name != "random_forest":
-        return {}
+        if model_name != "xgboost":
+            return {}
+
+        xgboost_config = model_config.get("xgboost", {})
+        return {
+            "n_estimators": int(xgboost_config.get("n_estimators", 400)),
+            "max_depth": int(xgboost_config.get("max_depth", 6)),
+            "learning_rate": float(xgboost_config.get("learning_rate", 0.05)),
+            "subsample": float(xgboost_config.get("subsample", 0.9)),
+            "colsample_bytree": float(xgboost_config.get("colsample_bytree", 0.9)),
+            "reg_alpha": float(xgboost_config.get("reg_alpha", 0.0)),
+            "reg_lambda": float(xgboost_config.get("reg_lambda", 1.0)),
+            "model_random_state": random_state,
+        }
 
     random_forest_config = model_config.get("random_forest", {})
     return {

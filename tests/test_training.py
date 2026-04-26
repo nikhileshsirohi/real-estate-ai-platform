@@ -4,6 +4,7 @@ import json
 
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
 
 from src.training.evaluate import evaluate_regression_model
 from src.training.train_model import build_model, save_model_artifacts, train_model
@@ -45,6 +46,26 @@ def test_build_model_returns_random_forest_when_configured() -> None:
     )
 
     assert isinstance(model, RandomForestRegressor)
+
+
+def test_build_model_returns_xgboost_when_configured() -> None:
+    model = build_model(
+        "xgboost",
+        {
+            "xgboost": {
+                "n_estimators": 50,
+                "max_depth": 4,
+                "learning_rate": 0.1,
+                "subsample": 0.8,
+                "colsample_bytree": 0.8,
+                "reg_alpha": 0.0,
+                "reg_lambda": 1.0,
+            }
+        },
+        random_state=42,
+    )
+
+    assert isinstance(model, XGBRegressor)
 
 
 def test_save_model_artifacts_creates_model_and_metadata_files(tmp_path) -> None:
