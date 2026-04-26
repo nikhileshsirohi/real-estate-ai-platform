@@ -3,6 +3,7 @@
 from collections.abc import Generator
 from datetime import datetime, timezone
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -143,3 +144,30 @@ def test_predict_price_returns_prediction() -> None:
     assert "predicted_price" in response_body
     assert isinstance(response_body["model_name"], str)
     assert response_body["prediction_id"] == 1
+
+
+def test_ask_market_returns_advice() -> None:
+    with patch("src.api.routes.ask_market_question") as mocked_ask_market:
+        mocked_ask_market.return_value = {
+            "answer": "Statewide affordability remains pressured by high ownership costs and elevated housing values.",
+            "model_name": "qwen2.5:14b",
+            "sources": [
+                {
+                    "chunk_id": "doc-0-chunk-0",
+                    "source_path": "data/knowledge/raw/california_housing_snapshot.md",
+                    "title": "California Housing Snapshot",
+                    "content": "Median value of owner-occupied housing units was $734,700.",
+                    "score": 0.92,
+                }
+            ],
+        }
+
+        response = client.post(
+            "/ask-market",
+            json={"question": "What supports California affordability pressure?"},
+        )
+
+    assert response.status_code == 200
+    response_body = response.json()
+    assert response_body["model_name"] == "qwen2.5:14b"
+    assert len(response_body["sources"]) == 1

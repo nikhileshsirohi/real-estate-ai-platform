@@ -271,3 +271,35 @@ Core RAG files:
 - `src/rag/embeddings.py`
 - `src/rag/build_index.py`
 - `src/rag/retrieve.py`
+
+## Ollama RAG
+The project now includes a local Ollama-backed advisory layer.
+
+Current default local model:
+- `qwen2.5:14b`
+
+Make sure Ollama is running, then build the index:
+
+```bash
+python -m src.rag.build_index
+```
+
+Run a simple local generation test:
+
+```bash
+python -m src.rag.retrieve
+```
+
+Use the new API endpoint:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/ask-market" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "What official statewide facts support the view that California housing affordability is under pressure?"
+  }'
+```
+
+Notebook flow:
+- `notebooks/04_rag_corpus_and_retrieval.ipynb`
+- `notebooks/05_ollama_rag_qa.ipynb`

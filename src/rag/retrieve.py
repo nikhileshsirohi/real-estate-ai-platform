@@ -8,7 +8,7 @@ import numpy as np
 
 from src.rag.embeddings import embed_texts, load_embedding_model
 from src.rag.schemas import RetrievalResult
-from src.utils.config_loader import load_yaml_config
+from src.utils.config_loader import load_yaml_config, resolve_project_path
 
 
 RAG_CONFIG_PATH = Path("configs/rag_config.yaml")
@@ -22,7 +22,7 @@ def load_chunks_metadata(chunks_path: Path) -> list[dict[str, str]]:
 def retrieve(query: str, top_k: int | None = None) -> list[RetrievalResult]:
     """Retrieve the most relevant chunks for a query."""
     rag_config = load_yaml_config(RAG_CONFIG_PATH)
-    index_output_dir = Path(str(rag_config["index_output_dir"]))
+    index_output_dir = resolve_project_path(str(rag_config["index_output_dir"]))
     model_name = str(rag_config["embedding_model_name"])
     k = int(top_k or rag_config["top_k"])
 

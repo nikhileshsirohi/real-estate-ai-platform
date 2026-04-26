@@ -44,3 +44,21 @@ class PredictionHistoryResponse(BaseModel):
 
 class PredictionDetailResponse(PredictionHistoryItem):
     """Detailed response for a single stored prediction."""
+
+
+class MarketQuestionRequest(BaseModel):
+    question: str = Field(..., min_length=5)
+
+
+class MarketAdviceSource(BaseModel):
+    chunk_id: str
+    source_path: str
+    title: str
+    content: str
+    score: float
+
+
+class MarketAdviceResponse(BaseModel):
+    answer: str
+    model_name: str
+    sources: list[MarketAdviceSource]

@@ -4,3 +4,7 @@ index_output_dir: data/knowledge/index
 chunk_size: 600
 chunk_overlap: 120
 top_k: 5
+ollama_base_url: http://localhost:11434
+ollama_model_name: qwen2.5:14b
+generation_temperature: 0.2
+generation_top_k: 4

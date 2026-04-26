@@ -9,7 +9,7 @@ import numpy as np
 from src.rag.chunking import chunk_documents
 from src.rag.document_loader import load_markdown_documents
 from src.rag.embeddings import embed_texts, load_embedding_model
-from src.utils.config_loader import load_yaml_config
+from src.utils.config_loader import load_yaml_config, resolve_project_path
 
 
 RAG_CONFIG_PATH = Path("configs/rag_config.yaml")
@@ -24,8 +24,8 @@ def save_chunks_metadata(chunks_path: Path, metadata: list[dict[str, str]]) -> N
 def main() -> None:
     """Build and save the local FAISS knowledge index."""
     rag_config = load_yaml_config(RAG_CONFIG_PATH)
-    raw_dir = Path(str(rag_config["knowledge_raw_dir"]))
-    index_output_dir = Path(str(rag_config["index_output_dir"]))
+    raw_dir = resolve_project_path(str(rag_config["knowledge_raw_dir"]))
+    index_output_dir = resolve_project_path(str(rag_config["index_output_dir"]))
     chunk_size = int(rag_config["chunk_size"])
     chunk_overlap = int(rag_config["chunk_overlap"])
     model_name = str(rag_config["embedding_model_name"])

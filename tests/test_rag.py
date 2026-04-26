@@ -4,6 +4,7 @@ from pathlib import Path
 
 from src.rag.chunking import chunk_documents
 from src.rag.document_loader import load_markdown_documents
+from src.rag.generator import build_market_prompt
 from src.rag.schemas import KnowledgeDocument
 
 
@@ -32,3 +33,13 @@ def test_chunk_documents_creates_chunks() -> None:
     assert len(chunks) >= 4
     assert chunks[0].title == "Doc"
     assert chunks[0].chunk_id.startswith("doc-0-chunk-")
+
+
+def test_build_market_prompt_contains_question_and_context() -> None:
+    prompt = build_market_prompt(
+        question="What supports California affordability pressure?",
+        retrieved_context="Median value of owner-occupied housing units was $734,700.",
+    )
+
+    assert "What supports California affordability pressure?" in prompt
+    assert "Median value of owner-occupied housing units was $734,700." in prompt

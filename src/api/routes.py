@@ -7,6 +7,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from src.api.schemas import (
+    MarketAdviceResponse,
+    MarketQuestionRequest,
     PredictionDetailResponse,
     PredictionHistoryItem,
     PredictionHistoryResponse,
@@ -21,6 +23,7 @@ from src.db.repository import (
 )
 from src.db.session import get_db
 from src.inference.predictor import load_model_name, predict_price
+from src.rag.service import ask_market_question
 from src.utils.logger import get_logger, log_event
 
 
@@ -179,3 +182,23 @@ def predict_price_route(
         model_name=model_name,
         prediction_id=saved_record.id,
     )
+
+
+@router.post("/ask-market", response_model=MarketAdviceResponse)
+def ask_market_route(payload: MarketQuestionRequest) -> MarketAdviceResponse:
+    """Answer a market question using local retrieval plus Ollama."""
+    try:
+        result = ask_market_question(payload.question)
+    except Exception as exc:
+        log_event(logger, logging.ERROR, "market_advice_failed", question=payload.question, error=str(exc))
+        raise HTTPException(status_code=500, detail=f"Market advice failed: {exc}")
+
+    log_event(
+        logger,
+        logging.INFO,
+        "market_advice_created",
+        question=payload.question,
+        model_name=result["model_name"],
+        source_count=len(result["sources"]),
+    )
+    return MarketAdviceResponse(**result)

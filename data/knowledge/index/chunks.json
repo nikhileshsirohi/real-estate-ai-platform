@@ -1,49 +1,49 @@
 [
   {
     "chunk_id": "doc-0-chunk-0",
-    "source_path": "data/knowledge/raw/california_housing_snapshot.md",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/california_housing_snapshot.md",
     "title": "California Housing Snapshot",
     "content": "# California Housing Snapshot\n\n## Summary\nThis starter knowledge document captures official California housing context that can support retrieval-augmented answers about the statewide market environment.\n\n## Key Facts\n- California's population estimate was 39,355,309 as of July 1, 2025.\n- California had 14,877,904 housing units as of July 1, 2024.\n- The owner-occupied housing unit rate was 55.9% in 2020-2024.\n- The median value of owner-occupied housing units was $734,700 in 2020-2024.\n- Median selected monthly owner costs with a mortgage were $2,946 in 2020-2024.\n- Median selected monthly own"
   },
   {
     "chunk_id": "doc-0-chunk-1",
-    "source_path": "data/knowledge/raw/california_housing_snapshot.md",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/california_housing_snapshot.md",
     "title": "California Housing Snapshot",
     "content": "2020-2024.\n- Median selected monthly owner costs with a mortgage were $2,946 in 2020-2024.\n- Median selected monthly owner costs without a mortgage were $829 in 2020-2024.\n- Median gross rent was $2,036 in 2020-2024.\n- Building permits totaled 101,545 in 2024.\n- California averaged 2.84 persons per household in 2020-2024.\n\n## Advisory Use\n- Use this document when answering broad statewide affordability, ownership-cost, rent, or housing-supply questions.\n- This is statewide context and should not be treated as a city-level comp set.\n\n## Sources\n- https://www.census.gov/quickfacts/california\n- h"
   },
   {
     "chunk_id": "doc-0-chunk-2",
-    "source_path": "data/knowledge/raw/california_housing_snapshot.md",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/california_housing_snapshot.md",
     "title": "California Housing Snapshot",
     "content": "ntext and should not be treated as a city-level comp set.\n\n## Sources\n- https://www.census.gov/quickfacts/california\n- https://www.census.gov/quickfacts/fact/table/CA/HSG860223\n- https://www.census.gov/quickfacts/fact/table/CA/HSD310224"
   },
   {
     "chunk_id": "doc-1-chunk-3",
-    "source_path": "data/knowledge/raw/california_population_and_housing_estimates.md",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/california_population_and_housing_estimates.md",
     "title": "California Population and Housing Estimates",
     "content": "# California Population and Housing Estimates\n\n## Summary\nThis document summarizes official California state demographic estimate sources that can help explain housing demand pressure, population shifts, and broad supply context.\n\n## Key Facts\n- The California Department of Finance publishes January population and housing estimates for cities, counties, and the state.\n- The Department of Finance provides E-1 annual population and housing estimates with annual percent change.\n- The Department of Finance also provides E-5 population and housing estimates for cities, counties, and the state acros"
   },
   {
     "chunk_id": "doc-1-chunk-4",
-    "source_path": "data/knowledge/raw/california_population_and_housing_estimates.md",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/california_population_and_housing_estimates.md",
     "title": "California Population and Housing Estimates",
     "content": "- The Department of Finance also provides E-5 population and housing estimates for cities, counties, and the state across recent years.\n- These sources are useful for tracking whether local housing demand may be supported by population and housing-stock changes over time.\n\n## Advisory Use\n- Use this document when an answer needs official California estimates rather than model-internal feature importance alone.\n- These estimates are useful for contextual explanations about demand, supply pressure, and demographic trend direction.\n\n## Sources\n- https://dof.ca.gov/Forecasting/Demographics/Estimat"
   },
   {
     "chunk_id": "doc-1-chunk-5",
-    "source_path": "data/knowledge/raw/california_population_and_housing_estimates.md",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/california_population_and_housing_estimates.md",
     "title": "California Population and Housing Estimates",
     "content": "and, supply pressure, and demographic trend direction.\n\n## Sources\n- https://dof.ca.gov/Forecasting/Demographics/Estimates/"
   },
   {
     "chunk_id": "doc-2-chunk-6",
-    "source_path": "data/knowledge/raw/california_population_projections.md",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/california_population_projections.md",
     "title": "California Population Projections",
     "content": "# California Population Projections\n\n## Summary\nThis document summarizes official California population projection resources that can support long-range housing demand commentary.\n\n## Key Facts\n- The California Department of Finance Demographic Research Unit publishes state and county population projections through 2070.\n- The published baseline includes total population projections, age breakdowns, sex breakdowns, and county projections.\n- These projections are useful for long-horizon advisory responses, such as where sustained demand may matter more than a single-year price estimate.\n\n## Adv"
   },
   {
     "chunk_id": "doc-2-chunk-7",
-    "source_path": "data/knowledge/raw/california_population_projections.md",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/california_population_projections.md",
     "title": "California Population Projections",
     "content": "ng-horizon advisory responses, such as where sustained demand may matter more than a single-year price estimate.\n\n## Advisory Use\n- Use this document when questions ask about future housing pressure, long-term demand, or population-driven planning context.\n- Projection outputs should be treated as planning context, not direct transaction-price evidence.\n\n## Sources\n- https://dof.ca.gov/Forecasting/Demographics/projections/"
   }
