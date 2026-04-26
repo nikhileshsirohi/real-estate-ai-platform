@@ -26,3 +26,9 @@ models/*.joblib
 # Test/cache
 .pytest_cache/
 .coverage
+
+# Local runtime artifacts
+mlflow.db
+
+# Docker overrides
+docker-compose.override.yml

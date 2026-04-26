@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:14
+    container_name: real_estate_db
+    environment:
+      POSTGRES_DB: real_estate_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: real_estate_api
+    depends_on:
+      - db
+    environment:
+      APP_ENV: development
+      LOG_LEVEL: INFO
+      MLFLOW_TRACKING_URI: http://host.docker.internal:5000
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/real_estate_db
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_data:

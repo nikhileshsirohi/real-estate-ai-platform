@@ -151,6 +151,33 @@ History endpoint:
 - Try stricter clipping or additional geo features if XGBoost plateaus
 - Package the app with Docker
 
+## Docker
+Run the full API + PostgreSQL stack with Docker:
+
+```bash
+docker compose up --build
+```
+
+This starts:
+- `api` on `http://127.0.0.1:8000`
+- `db` on `localhost:5432`
+
+Inside Docker, the API uses:
+
+```env
+DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/real_estate_db
+```
+
+Useful commands:
+
+```bash
+docker compose up --build
+docker compose down
+docker compose down -v
+```
+
+Use `docker compose down -v` only if you want to remove the Postgres volume and reset stored prediction history.
+
 ## Notebooks
 Keep notebook work separated by purpose:
 - `notebooks/01_eda.ipynb`: data understanding and skew/outlier analysis
