@@ -1,0 +1,16 @@
+[
+    "median_income",
+    "house_age",
+    "latitude",
+    "longitude",
+    "bedroom_ratio",
+    "average_rooms_capped",
+    "average_bedrooms_capped",
+    "average_occupancy_capped",
+    "rooms_per_person_capped",
+    "population_capped",
+    "log_population",
+    "log_average_rooms",
+    "log_average_occupancy",
+    "log_rooms_per_person"
+]

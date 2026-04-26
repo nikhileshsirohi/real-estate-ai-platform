@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import joblib
+import numpy as np
 import pandas as pd
 
 
@@ -49,6 +50,16 @@ def create_inference_features(input_data: dict[str, float]) -> dict[str, float]:
     features = dict(input_data)
     features["bedroom_ratio"] = average_bedrooms / average_rooms
     features["rooms_per_person"] = average_rooms / average_occupancy
+    features["log_population"] = float(np.log1p(features["population"]))
+    features["log_average_occupancy"] = float(np.log1p(features["average_occupancy"]))
+    features["log_average_rooms"] = float(np.log1p(features["average_rooms"]))
+    features["log_average_bedrooms"] = float(np.log1p(features["average_bedrooms"]))
+    features["log_rooms_per_person"] = float(np.log1p(features["rooms_per_person"]))
+    features["population_capped"] = features["population"]
+    features["average_occupancy_capped"] = features["average_occupancy"]
+    features["average_rooms_capped"] = features["average_rooms"]
+    features["average_bedrooms_capped"] = features["average_bedrooms"]
+    features["rooms_per_person_capped"] = features["rooms_per_person"]
     return features
 
 

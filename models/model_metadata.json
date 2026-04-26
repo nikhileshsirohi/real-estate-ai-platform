@@ -1,5 +1,5 @@
 {
-  "model_name": "random_forest",
+  "model_name": "xgboost",
   "feature_columns": [
     "median_income",
     "house_age",
@@ -10,6 +10,16 @@
     "latitude",
     "longitude",
     "bedroom_ratio",
-    "rooms_per_person"
+    "rooms_per_person",
+    "log_population",
+    "population_capped",
+    "log_average_occupancy",
+    "average_occupancy_capped",
+    "log_average_rooms",
+    "average_rooms_capped",
+    "log_average_bedrooms",
+    "average_bedrooms_capped",
+    "log_rooms_per_person",
+    "rooms_per_person_capped"
   ]
 }

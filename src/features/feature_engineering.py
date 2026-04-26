@@ -2,12 +2,20 @@
 
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 
 CLEANED_DATA_PATH = Path("data/processed/california_housing_cleaned.csv")
 FEATURE_DATA_PATH = Path("data/processed/california_housing_features.csv")
 TARGET_COLUMN = "median_house_value"
+SKEWED_COLUMNS = [
+    "population",
+    "average_occupancy",
+    "average_rooms",
+    "average_bedrooms",
+    "rooms_per_person",
+]
 
 
 def load_cleaned_dataset(input_path: Path) -> pd.DataFrame:
@@ -16,10 +24,16 @@ def load_cleaned_dataset(input_path: Path) -> pd.DataFrame:
 
 
 def create_engineered_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Create a minimal set of additional model features for V1."""
+    """Create additional model features guided by EDA findings."""
     feature_df = df.copy()
     feature_df["bedroom_ratio"] = feature_df["average_bedrooms"] / feature_df["average_rooms"]
     feature_df["rooms_per_person"] = feature_df["average_rooms"] / feature_df["average_occupancy"]
+
+    for column_name in SKEWED_COLUMNS:
+        feature_df[f"log_{column_name}"] = np.log1p(feature_df[column_name])
+        upper_clip_value = feature_df[column_name].quantile(0.99)
+        feature_df[f"{column_name}_capped"] = feature_df[column_name].clip(upper=upper_clip_value)
+
     return feature_df
 
 

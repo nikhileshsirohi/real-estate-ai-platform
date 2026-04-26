@@ -35,6 +35,12 @@ python -m src.data.cleaning
 python -m src.features.feature_engineering
 ```
 
+Current feature engineering adds:
+- `bedroom_ratio`
+- `rooms_per_person`
+- log-transformed versions of skewed columns
+- capped versions of skewed columns using the 99th percentile from the training dataset
+
 ## Training
 Choose the model in [configs/model_config.yaml](/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/configs/model_config.yaml).
 
@@ -85,5 +91,6 @@ curl -X POST "http://127.0.0.1:8000/predict-price" \
 
 ## Next Improvement Ideas
 - Compare `linear_regression` vs `random_forest` vs `xgboost` in MLflow
+- Try stricter clipping or additional geo features if XGBoost plateaus
 - Store prediction history in PostgreSQL
 - Package the app with Docker

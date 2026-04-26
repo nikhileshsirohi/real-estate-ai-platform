@@ -1,0 +1,18 @@
+{
+    "rmse": 0.4388,
+    "mae": 0.2865,
+    "r2": 0.8531,
+    "target_unit": "100000 USD",
+    "approx_mae_usd": 28652.09,
+    "approx_rmse_usd": 43879.56,
+    "best_params": {
+        "subsample": 1.0,
+        "reg_lambda": 3,
+        "reg_alpha": 1,
+        "n_estimators": 900,
+        "min_child_weight": 7,
+        "max_depth": 5,
+        "learning_rate": 0.07,
+        "colsample_bytree": 0.7
+    }
+}
