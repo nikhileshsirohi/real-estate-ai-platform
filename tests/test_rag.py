@@ -4,7 +4,7 @@ from pathlib import Path
 
 from src.rag.chunking import chunk_documents
 from src.rag.document_loader import load_markdown_documents
-from src.rag.generator import build_market_prompt
+from src.rag.generator import build_market_prompt, build_property_advisory_prompt
 from src.rag.service import build_property_summary
 from src.rag.schemas import KnowledgeDocument
 
@@ -62,3 +62,16 @@ def test_build_property_summary_includes_expected_fields() -> None:
 
     assert "median_income: 8.3252" in summary
     assert "longitude: -122.23" in summary
+
+
+def test_build_property_advisory_prompt_includes_local_listing_context() -> None:
+    prompt = build_property_advisory_prompt(
+        question="How should I interpret this predicted price?",
+        property_summary="median_income: 8.3252",
+        predicted_price=3.95,
+        retrieved_context="Statewide context here.",
+        local_listing_context="Nearby listing snapshot here.",
+    )
+
+    assert "Nearby listing snapshot here." in prompt
+    assert "Treat local listing context as demo nearby inventory" in prompt

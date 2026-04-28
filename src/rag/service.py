@@ -4,6 +4,8 @@ import logging
 from dataclasses import asdict
 from typing import Sequence
 
+from src.db.repository import find_nearest_property_listings
+from src.db.session import SessionLocal
 from src.inference.predictor import predict_price
 from src.rag.generator import generate_property_advice_with_ollama, generate_with_ollama
 from src.rag.retrieve import retrieve
@@ -131,6 +133,39 @@ def build_property_summary(property_features: dict[str, float]) -> str:
     return "\n".join(ordered_lines)
 
 
+def build_local_listing_context(property_features: dict[str, float]) -> tuple[str | None, str | None, list]:
+    """Build a compact local listing snapshot from nearby seeded inventory."""
+    db = SessionLocal()
+    try:
+        nearby_listings = find_nearest_property_listings(
+            db=db,
+            latitude=property_features["latitude"],
+            longitude=property_features["longitude"],
+            limit=3,
+        )
+    finally:
+        db.close()
+
+    if not nearby_listings:
+        return None, None, []
+
+    context_lines: list[str] = [
+        "The following nearby demo listings come from the seeded local inventory and are not official transaction comps."
+    ]
+    primary_city = nearby_listings[0].city
+    primary_locality = nearby_listings[0].locality
+
+    for index, listing in enumerate(nearby_listings, start=1):
+        context_lines.append(
+            f"[Nearby Listing {index}] {listing.title} | city={listing.city} | locality={listing.locality} | "
+            f"type={listing.property_type} | bedrooms={listing.bedrooms} | bathrooms={listing.bathrooms} | "
+            f"area_sqft={listing.area_sqft} | asking_price_usd={listing.asking_price_usd:,.0f} | "
+            f"description={listing.description}"
+        )
+
+    return "\n".join(context_lines), primary_city, nearby_listings
+
+
 def ask_property_question(question: str, property_features: dict[str, float]) -> dict[str, object]:
     """Generate property-specific advice using prediction plus retrieved context."""
     rag_config = load_yaml_config("configs/rag_config.yaml")
@@ -145,8 +180,22 @@ def ask_property_question(question: str, property_features: dict[str, float]) ->
     log_event(logger, logging.INFO, "property_prediction_started", question=question)
     predicted_price = predict_price(property_features)
     log_event(logger, logging.INFO, "property_prediction_completed", predicted_price=predicted_price)
+    local_listing_context, inferred_city, nearby_listings = build_local_listing_context(property_features)
+    retrieval_query = question
+    if inferred_city:
+        retrieval_query = (
+            f"{question} The property is near demo listings in {inferred_city}. "
+            "Use local affordability, locality, and inventory tradeoff context if available."
+        )
+    log_event(
+        logger,
+        logging.INFO,
+        "property_local_context_built",
+        inferred_city=inferred_city,
+        nearby_listing_count=len(nearby_listings),
+    )
     log_event(logger, logging.INFO, "property_retrieval_started", top_k=top_k)
-    retrieved_results = retrieve(query=question, top_k=top_k)
+    retrieved_results = retrieve(query=retrieval_query, top_k=top_k)
     results = filter_results_by_score(retrieved_results, min_score=min_score)
     log_event(
         logger,
@@ -157,6 +206,35 @@ def ask_property_question(question: str, property_features: dict[str, float]) ->
         min_score=min_score,
     )
     if len(results) < min_sources_required:
+        if local_listing_context:
+            log_event(
+                logger,
+                logging.INFO,
+                "property_retrieval_below_threshold_using_local_context",
+                nearby_listing_count=len(nearby_listings),
+            )
+            context = build_context_from_results(
+                results or retrieved_results[:min(top_k, len(retrieved_results))],
+                max_chars_per_source=max_chars_per_source,
+            )
+            property_summary = build_property_summary(property_features)
+            answer = generate_property_advice_with_ollama(
+                question=question,
+                property_summary=property_summary,
+                predicted_price=predicted_price,
+                retrieved_context=context,
+                local_listing_context=local_listing_context,
+                base_url=base_url,
+                model_name=model_name,
+                temperature=temperature,
+            )
+            return {
+                "answer": answer,
+                "model_name": model_name,
+                "predicted_price": predicted_price,
+                "predicted_price_usd": predicted_price * 100000,
+                "sources": [asdict(result) for result in results or retrieved_results[:min(top_k, len(retrieved_results))]],
+            }
         log_event(
             logger,
             logging.INFO,
@@ -187,6 +265,7 @@ def ask_property_question(question: str, property_features: dict[str, float]) ->
         property_summary=property_summary,
         predicted_price=predicted_price,
         retrieved_context=context,
+        local_listing_context=local_listing_context,
         base_url=base_url,
         model_name=model_name,
         temperature=temperature,

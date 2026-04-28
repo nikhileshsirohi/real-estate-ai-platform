@@ -204,3 +204,19 @@ def search_property_listings_with_fallback(
         f"versus requested max ${budget_cap:,.0f}."
     )
     return fallback_matches, "closest_match", advisory_note
+
+
+def find_nearest_property_listings(
+    db: Session,
+    *,
+    latitude: float,
+    longitude: float,
+    limit: int = 3,
+) -> list[PropertyListing]:
+    """Return the nearest seeded listings to a coordinate pair."""
+    distance_expr = (
+        func.power(PropertyListing.latitude - latitude, 2)
+        + func.power(PropertyListing.longitude - longitude, 2)
+    )
+    stmt = select(PropertyListing).order_by(distance_expr.asc()).limit(limit)
+    return list(db.scalars(stmt).all())

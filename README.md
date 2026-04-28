@@ -311,6 +311,7 @@ Keep notebook work separated by purpose:
 - `notebooks/07_property_search_llm.ipynb`: load listings and test LLM-assisted property search
 - `notebooks/08_property_recommendation.ipynb`: explain and recommend matched property search results
 - `notebooks/09_local_inventory_and_area_rag.ipynb`: reload expanded listings and rebuild/test local area RAG
+- `notebooks/10_property_advisory_local_context.ipynb`: test property advice with nearby demo listing context
 
 ## RAG Starter
 The project now includes a starter local knowledge corpus built from official California sources so you can begin RAG work without a private dataset.
@@ -328,6 +329,8 @@ Additional local demo context now included:
 - `demo_locality_preference_notes.md`
 
 These local demo docs are derived from the seeded listing inventory and are meant for prototype retrieval quality, not official market research.
+
+Property advisory now also uses nearby seeded listings as local demo context when possible. This helps the model compare the predicted estimate against approximate nearby inventory, while still treating that inventory as demo context rather than official comparable-sale evidence.
 
 Build the local vector index:
 

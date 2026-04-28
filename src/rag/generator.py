@@ -28,13 +28,15 @@ def build_property_advisory_prompt(
     property_summary: str,
     predicted_price: float,
     retrieved_context: str,
+    local_listing_context: str | None = None,
 ) -> str:
     """Build a grounded prompt for property-level advisory answers."""
     return (
         "You are a real estate price and market advisor.\n"
-        "Use the provided model estimate and retrieved context only.\n"
+        "Use the provided model estimate, retrieved context, and local listing context only.\n"
         "Do not invent neighborhood facts, local comps, or area-specific claims that are not in the context.\n"
         "Do not present statewide demographic context as direct evidence for this exact property.\n"
+        "Treat local listing context as demo nearby inventory, not official transaction evidence.\n"
         "If context is broad or planning-oriented, say so clearly.\n"
         "If the retrieved sources are weak for this property question, be conservative.\n\n"
         f"Property summary:\n{property_summary}\n\n"
@@ -42,10 +44,11 @@ def build_property_advisory_prompt(
         f"Predicted price (approx USD): ${predicted_price * 100000:,.0f}\n\n"
         f"Question:\n{question}\n\n"
         f"Context:\n{retrieved_context}\n\n"
+        f"Local listing context:\n{local_listing_context or 'None'}\n\n"
         "Answer with:\n"
         "1. A short direct answer\n"
         "2. A practical interpretation of the model estimate\n"
-        "3. A short market-context explanation grounded in the retrieved sources only\n"
+        "3. A short market-context explanation grounded in the provided sources only\n"
         "4. A short limitations note"
     )
 
@@ -100,6 +103,7 @@ def generate_property_advice_with_ollama(
     property_summary: str,
     predicted_price: float,
     retrieved_context: str,
+    local_listing_context: str | None,
     base_url: str,
     model_name: str,
     temperature: float,
@@ -110,6 +114,7 @@ def generate_property_advice_with_ollama(
         property_summary=property_summary,
         predicted_price=predicted_price,
         retrieved_context=retrieved_context,
+        local_listing_context=local_listing_context,
     )
     return _generate_with_ollama_prompt(
         prompt=prompt,
