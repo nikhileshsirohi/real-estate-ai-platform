@@ -32,6 +32,10 @@
             <h2>Monitoring Snapshot</h2>
             <button id="refresh-monitoring" class="ghost-button">Refresh</button>
           </div>
+          <p class="panel-copy">
+            This section shows live platform health. It tracks how often the app is being used, how fast it responds,
+            how many predictions and listings are stored, and the headline quality of the current ML model.
+          </p>
           <div class="metrics-grid">
             <div class="metric-card">
               <span class="metric-label">Total Requests</span>
@@ -58,7 +62,7 @@
               <strong id="metric-rag-documents">-</strong>
             </div>
           </div>
-          <pre id="monitoring-json" class="code-block"></pre>
+          <div id="monitoring-output" class="response-card response-card-light"></div>
         </section>
 
         <section class="panel">
@@ -66,17 +70,17 @@
             <h2>Predict Price</h2>
           </div>
           <form id="predict-form" class="form-grid">
-            <input name="median_income" type="number" step="0.0001" value="8.3252" placeholder="Median income" />
-            <input name="house_age" type="number" step="0.1" value="41" placeholder="House age" />
-            <input name="average_rooms" type="number" step="0.0001" value="6.984127" placeholder="Average rooms" />
-            <input name="average_bedrooms" type="number" step="0.0001" value="1.02381" placeholder="Average bedrooms" />
-            <input name="population" type="number" step="1" value="322" placeholder="Population" />
-            <input name="average_occupancy" type="number" step="0.0001" value="2.555556" placeholder="Average occupancy" />
-            <input name="latitude" type="number" step="0.0001" value="37.809" placeholder="Latitude" />
-            <input name="longitude" type="number" step="0.0001" value="-122.257" placeholder="Longitude" />
+            <label class="field-group"><span>Median income</span><input name="median_income" type="number" step="0.0001" value="8.3252" placeholder="Median income" /></label>
+            <label class="field-group"><span>House age</span><input name="house_age" type="number" step="0.1" value="41" placeholder="House age" /></label>
+            <label class="field-group"><span>Average rooms</span><input name="average_rooms" type="number" step="0.0001" value="6.984127" placeholder="Average rooms" /></label>
+            <label class="field-group"><span>Average bedrooms</span><input name="average_bedrooms" type="number" step="0.0001" value="1.02381" placeholder="Average bedrooms" /></label>
+            <label class="field-group"><span>Population</span><input name="population" type="number" step="1" value="322" placeholder="Population" /></label>
+            <label class="field-group"><span>Average occupancy</span><input name="average_occupancy" type="number" step="0.0001" value="2.555556" placeholder="Average occupancy" /></label>
+            <label class="field-group"><span>Latitude</span><input name="latitude" type="number" step="0.0001" value="37.809" placeholder="Latitude" /></label>
+            <label class="field-group"><span>Longitude</span><input name="longitude" type="number" step="0.0001" value="-122.257" placeholder="Longitude" /></label>
             <button type="submit" class="primary-button">Predict</button>
           </form>
-          <pre id="predict-output" class="code-block"></pre>
+          <div id="predict-output" class="response-card"></div>
         </section>
 
         <section class="panel">
@@ -84,10 +88,13 @@
             <h2>Ask Market</h2>
           </div>
           <form id="market-form" class="stack-form">
-            <textarea name="question" rows="5">Which demo city looks more affordable for a lower-entry buyer, Sacramento or San Francisco?</textarea>
+            <label class="field-group">
+              <span>Your market question</span>
+              <textarea name="question" rows="5">Which demo city looks more affordable for a lower-entry buyer, Sacramento or San Francisco?</textarea>
+            </label>
             <button type="submit" class="primary-button">Ask</button>
           </form>
-          <pre id="market-output" class="code-block"></pre>
+          <div id="market-output" class="response-card"></div>
         </section>
 
         <section class="panel panel-wide">
@@ -95,18 +102,21 @@
             <h2>Advise Property</h2>
           </div>
           <form id="advice-form" class="form-grid">
-            <textarea name="question" rows="4" class="full-span">How should I interpret this predicted price for a buyer who wants Oakland city access?</textarea>
-            <input name="median_income" type="number" step="0.0001" value="8.3252" />
-            <input name="house_age" type="number" step="0.1" value="41" />
-            <input name="average_rooms" type="number" step="0.0001" value="6.984127" />
-            <input name="average_bedrooms" type="number" step="0.0001" value="1.02381" />
-            <input name="population" type="number" step="1" value="322" />
-            <input name="average_occupancy" type="number" step="0.0001" value="2.555556" />
-            <input name="latitude" type="number" step="0.0001" value="37.809" />
-            <input name="longitude" type="number" step="0.0001" value="-122.257" />
-            <button type="submit" class="primary-button">Advise</button>
+            <label class="field-group full-span">
+              <span>Your property question</span>
+              <textarea name="question" rows="4">How should I interpret this predicted price for a buyer who wants Oakland city access?</textarea>
+            </label>
+            <label class="field-group"><span>Median income</span><input name="median_income" type="number" step="0.0001" value="8.3252" /></label>
+            <label class="field-group"><span>House age</span><input name="house_age" type="number" step="0.1" value="41" /></label>
+            <label class="field-group"><span>Average rooms</span><input name="average_rooms" type="number" step="0.0001" value="6.984127" /></label>
+            <label class="field-group"><span>Average bedrooms</span><input name="average_bedrooms" type="number" step="0.0001" value="1.02381" /></label>
+            <label class="field-group"><span>Population</span><input name="population" type="number" step="1" value="322" /></label>
+            <label class="field-group"><span>Average occupancy</span><input name="average_occupancy" type="number" step="0.0001" value="2.555556" /></label>
+            <label class="field-group"><span>Latitude</span><input name="latitude" type="number" step="0.0001" value="37.809" /></label>
+            <label class="field-group"><span>Longitude</span><input name="longitude" type="number" step="0.0001" value="-122.257" /></label>
+            <button type="submit" class="primary-button full-span">Advise</button>
           </form>
-          <pre id="advice-output" class="code-block"></pre>
+          <div id="advice-output" class="response-card"></div>
         </section>
 
         <section class="panel">
@@ -114,11 +124,17 @@
             <h2>Search Inventory</h2>
           </div>
           <form id="search-form" class="stack-form">
-            <textarea name="query" rows="4">Find me a family-friendly home in Oakland near BART</textarea>
-            <input name="limit" type="number" value="5" min="1" max="20" />
+            <label class="field-group">
+              <span>Your search request</span>
+              <textarea name="query" rows="4">Find me a family-friendly home in Oakland near BART</textarea>
+            </label>
+            <label class="field-group">
+              <span>How many results to show</span>
+              <input name="limit" type="number" value="5" min="1" max="20" />
+            </label>
             <button type="submit" class="primary-button">Search</button>
           </form>
-          <pre id="search-output" class="code-block"></pre>
+          <div id="search-output" class="response-card"></div>
         </section>
 
         <section class="panel">
@@ -126,18 +142,46 @@
             <h2>Recommend Listings</h2>
           </div>
           <form id="recommend-form" class="stack-form">
-            <textarea name="query" rows="4">Find me a 2 BHK in Oakland under 80 lakh</textarea>
-            <input name="limit" type="number" value="5" min="1" max="20" />
+            <label class="field-group">
+              <span>Your recommendation request</span>
+              <textarea name="query" rows="4">Find me a 2 BHK in Oakland under 80 lakh</textarea>
+            </label>
+            <label class="field-group">
+              <span>How many results to show</span>
+              <input name="limit" type="number" value="5" min="1" max="20" />
+            </label>
             <button type="submit" class="primary-button">Recommend</button>
           </form>
-          <pre id="recommend-output" class="code-block"></pre>
+          <div id="recommend-output" class="response-card"></div>
         </section>
 
         <section class="panel panel-wide">
           <div class="panel-header">
             <h2>Evaluation Snapshot</h2>
           </div>
-          <pre id="evaluation-json" class="code-block"></pre>
+          <p class="panel-copy">
+            Evaluation mode is a quick “how trustworthy is the system right now?” view. It summarizes model quality,
+            retrieval/index setup, and listing inventory coverage so you can judge whether the demo is in a healthy state.
+          </p>
+          <div class="evaluation-grid">
+            <div class="metric-card">
+              <span class="metric-label">Model MAE</span>
+              <strong id="metric-mae">-</strong>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Model R²</span>
+              <strong id="metric-r2">-</strong>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Cities Covered</span>
+              <strong id="metric-cities">-</strong>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">RAG Chunks</span>
+              <strong id="metric-rag-chunks">-</strong>
+            </div>
+          </div>
+          <div id="evaluation-output" class="response-card response-card-light"></div>
         </section>
       </main>
     </div>
