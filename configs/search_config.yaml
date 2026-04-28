@@ -1,5 +1,5 @@
 ollama_base_url: http://localhost:11434
-parser_model_name: qwen2.5-coder:7b-instruct
+parser_model_name: qwen2.5:14b
 recommendation_model_name: qwen2.5:14b
 default_limit: 10
 inr_per_usd: 83.0

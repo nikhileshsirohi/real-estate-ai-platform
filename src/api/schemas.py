@@ -114,6 +114,8 @@ class PropertySearchResponse(BaseModel):
     items: list[PropertyListingItem]
     count: int
     applied_filters: PropertySearchFilters
+    match_strategy: str = "exact"
+    advisory_note: str | None = None
 
 
 class PropertySearchQueryRequest(BaseModel):

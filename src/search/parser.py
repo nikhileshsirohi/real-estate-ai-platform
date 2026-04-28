@@ -11,6 +11,13 @@ from src.utils.config_loader import load_yaml_config
 
 
 SEARCH_CONFIG_PATH = "configs/search_config.yaml"
+KNOWN_CITIES = {
+    "san francisco",
+    "san jose",
+    "oakland",
+    "san diego",
+    "sacramento",
+}
 
 
 def build_property_search_prompt(query: str, limit: int) -> str:
@@ -20,6 +27,7 @@ def build_property_search_prompt(query: str, limit: int) -> str:
         "Return only valid JSON with no markdown.\n"
         "Use null for unknown values.\n"
         "All prices are in USD.\n"
+        "If a query mentions a city like San Francisco, San Jose, Oakland, San Diego, or Sacramento, put it in the city field, not locality.\n"
         "Allowed keys are exactly:\n"
         "city, locality, property_type, min_price_usd, max_price_usd, "
         "min_bedrooms, max_bedrooms, min_bathrooms, max_bathrooms, "
@@ -48,6 +56,13 @@ def _normalize_filters(payload: dict[str, Any], limit: int) -> PropertySearchFil
     normalized_payload["limit"] = int(normalized_payload.get("limit") or limit)
     normalized_payload["sort_by"] = str(normalized_payload.get("sort_by") or "asking_price_usd")
     normalized_payload["sort_order"] = str(normalized_payload.get("sort_order") or "asc")
+
+    city = normalized_payload.get("city")
+    locality = normalized_payload.get("locality")
+    if (not city) and isinstance(locality, str) and locality.strip().lower() in KNOWN_CITIES:
+        normalized_payload["city"] = locality.strip()
+        normalized_payload["locality"] = None
+
     return PropertySearchFilters(**normalized_payload)
 
 

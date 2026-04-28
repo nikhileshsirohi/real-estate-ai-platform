@@ -249,7 +249,7 @@ def test_search_properties_returns_filtered_items() -> None:
 def test_search_properties_query_parses_and_returns_items() -> None:
     with (
         patch("src.api.routes.parse_property_search_query") as mocked_parse,
-        patch("src.api.routes.search_property_listings") as mocked_search,
+        patch("src.api.routes.search_property_listings_with_fallback") as mocked_search,
     ):
         mocked_parse.return_value = (
             PropertySearchFilters(
@@ -263,24 +263,28 @@ def test_search_properties_query_parses_and_returns_items() -> None:
             ),
             "qwen2.5-coder:7b-instruct",
         )
-        mocked_search.return_value = [
-            SimpleNamespace(
-                id=11,
-                listing_code="CA-OAK-001",
-                title="Lake Merritt Condo",
-                city="Oakland",
-                locality="Lake Merritt",
-                property_type="condo",
-                bedrooms=2,
-                bathrooms=2.0,
-                area_sqft=1040.0,
-                asking_price_usd=725000.0,
-                description="Condo close to Lake Merritt.",
-                latitude=37.809,
-                longitude=-122.257,
-                created_at=datetime(2026, 4, 28, 12, 5, tzinfo=timezone.utc),
-            )
-        ]
+        mocked_search.return_value = (
+            [
+                SimpleNamespace(
+                    id=11,
+                    listing_code="CA-OAK-001",
+                    title="Lake Merritt Condo",
+                    city="Oakland",
+                    locality="Lake Merritt",
+                    property_type="condo",
+                    bedrooms=2,
+                    bathrooms=2.0,
+                    area_sqft=1040.0,
+                    asking_price_usd=725000.0,
+                    description="Condo close to Lake Merritt.",
+                    latitude=37.809,
+                    longitude=-122.257,
+                    created_at=datetime(2026, 4, 28, 12, 5, tzinfo=timezone.utc),
+                )
+            ],
+            "exact",
+            None,
+        )
 
         response = client.post(
             "/search-properties/query",
@@ -292,12 +296,13 @@ def test_search_properties_query_parses_and_returns_items() -> None:
     assert response_body["count"] == 1
     assert response_body["parser_model_name"] == "qwen2.5-coder:7b-instruct"
     assert response_body["items"][0]["city"] == "Oakland"
+    assert response_body["match_strategy"] == "exact"
 
 
 def test_search_properties_recommend_returns_answer() -> None:
     with (
         patch("src.api.routes.parse_property_search_query") as mocked_parse,
-        patch("src.api.routes.search_property_listings") as mocked_search,
+        patch("src.api.routes.search_property_listings_with_fallback") as mocked_search,
         patch("src.api.routes.recommend_property_results") as mocked_recommend,
     ):
         mocked_parse.return_value = (
@@ -309,27 +314,31 @@ def test_search_properties_recommend_returns_answer() -> None:
             ),
             "qwen2.5-coder:7b-instruct",
         )
-        mocked_search.return_value = [
-            SimpleNamespace(
-                id=12,
-                listing_code="CA-SJ-002",
-                title="North San Jose Apartment",
-                city="San Jose",
-                locality="North San Jose",
-                property_type="apartment",
-                bedrooms=2,
-                bathrooms=2.0,
-                area_sqft=960.0,
-                asking_price_usd=785000.0,
-                description="Two-bedroom apartment-style unit near major employers.",
-                latitude=37.387,
-                longitude=-121.93,
-                created_at=datetime(2026, 4, 28, 12, 15, tzinfo=timezone.utc),
-            )
-        ]
+        mocked_search.return_value = (
+            [
+                SimpleNamespace(
+                    id=12,
+                    listing_code="CA-SJ-002",
+                    title="North San Jose Apartment",
+                    city="San Jose",
+                    locality="North San Jose",
+                    property_type="apartment",
+                    bedrooms=2,
+                    bathrooms=2.0,
+                    area_sqft=960.0,
+                    asking_price_usd=785000.0,
+                    description="Two-bedroom apartment-style unit near major employers.",
+                    latitude=37.387,
+                    longitude=-121.93,
+                    created_at=datetime(2026, 4, 28, 12, 15, tzinfo=timezone.utc),
+                )
+            ],
+            "exact",
+            None,
+        )
         mocked_recommend.return_value = (
             "North San Jose Apartment is the best fit because it stays under budget and matches the requested bedroom count.",
-            "qwen2.5:14b",
+            "qwen2.5-coder:7b-instruct",
         )
 
         response = client.post(
@@ -341,5 +350,93 @@ def test_search_properties_recommend_returns_answer() -> None:
     response_body = response.json()
     assert response_body["count"] == 1
     assert response_body["parser_model_name"] == "qwen2.5-coder:7b-instruct"
-    assert response_body["recommendation_model_name"] == "qwen2.5:14b"
+    assert response_body["recommendation_model_name"] == "qwen2.5-coder:7b-instruct"
     assert "best fit" in response_body["answer"].lower()
+    assert response_body["match_strategy"] == "exact"
+
+
+def test_search_properties_recommend_handles_no_results() -> None:
+    with (
+        patch("src.api.routes.parse_property_search_query") as mocked_parse,
+        patch("src.api.routes.search_property_listings_with_fallback") as mocked_search,
+        patch("src.api.routes.recommend_property_results") as mocked_recommend,
+    ):
+        mocked_parse.return_value = (
+            PropertySearchFilters(
+                city="Oakland",
+                max_price_usd=96386.0,
+                min_bedrooms=2,
+                max_bedrooms=2,
+                limit=5,
+            ),
+            "qwen2.5-coder:7b-instruct",
+        )
+        mocked_search.return_value = (
+            [],
+            "exact",
+            "No listings matched the current non-price filters.",
+        )
+        mocked_recommend.return_value = (
+            "No property listings matched the current search filters in the local database.",
+            "qwen2.5-coder:7b-instruct",
+        )
+
+        response = client.post(
+            "/search-properties/recommend",
+            json={"query": "Find me a 2 BHK in Oakland under 80 lakh", "limit": 5},
+        )
+
+    assert response.status_code == 200
+    response_body = response.json()
+    assert response_body["count"] == 0
+    assert "no property listings matched" in response_body["answer"].lower()
+    assert response_body["match_strategy"] == "exact"
+
+
+def test_search_properties_query_returns_closest_matches_when_budget_too_low() -> None:
+    with (
+        patch("src.api.routes.parse_property_search_query") as mocked_parse,
+        patch("src.api.routes.search_property_listings_with_fallback") as mocked_search,
+    ):
+        mocked_parse.return_value = (
+            PropertySearchFilters(
+                city="Oakland",
+                max_price_usd=96386.0,
+                min_bedrooms=2,
+                limit=2,
+            ),
+            "qwen2.5-coder:7b-instruct",
+        )
+        mocked_search.return_value = (
+            [
+                SimpleNamespace(
+                    id=13,
+                    listing_code="CA-OAK-001",
+                    title="Lake Merritt Condo",
+                    city="Oakland",
+                    locality="Lake Merritt",
+                    property_type="condo",
+                    bedrooms=2,
+                    bathrooms=2.0,
+                    area_sqft=1040.0,
+                    asking_price_usd=725000.0,
+                    description="Condo close to Lake Merritt.",
+                    latitude=37.809,
+                    longitude=-122.257,
+                    created_at=datetime(2026, 4, 28, 12, 25, tzinfo=timezone.utc),
+                )
+            ],
+            "closest_match",
+            "No exact matches were found under the requested budget. Showing closest matches instead.",
+        )
+
+        response = client.post(
+            "/search-properties/query",
+            json={"query": "Find me a 2 BHK in Oakland under 80 lakh", "limit": 2},
+        )
+
+    assert response.status_code == 200
+    response_body = response.json()
+    assert response_body["count"] == 1
+    assert response_body["match_strategy"] == "closest_match"
+    assert "closest matches" in response_body["advisory_note"].lower()

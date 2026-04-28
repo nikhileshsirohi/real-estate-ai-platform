@@ -29,6 +29,7 @@ from src.db.repository import (
     get_prediction_record_by_id,
     list_recent_prediction_records,
     search_property_listings,
+    search_property_listings_with_fallback,
     save_prediction_record,
 )
 from src.db.session import get_db
@@ -334,7 +335,7 @@ def search_properties_by_query_route(
     """Parse a natural-language property search request, then query PostgreSQL."""
     try:
         filters, parser_model_name = parse_property_search_query(query=payload.query, limit=payload.limit)
-        records = search_property_listings(db=db, filters=filters)
+        records, match_strategy, advisory_note = search_property_listings_with_fallback(db=db, filters=filters)
     except SQLAlchemyError as exc:
         log_event(logger, logging.ERROR, "property_search_query_failed_database", query=payload.query, error=str(exc))
         raise HTTPException(status_code=500, detail=f"Property search failed: {exc}")
@@ -350,12 +351,15 @@ def search_properties_by_query_route(
         query=payload.query,
         count=len(items),
         parser_model_name=parser_model_name,
+        match_strategy=match_strategy,
     )
     return PropertySearchQueryResponse(
         items=items,
         count=len(items),
         applied_filters=filters,
         parser_model_name=parser_model_name,
+        match_strategy=match_strategy,
+        advisory_note=advisory_note,
     )
 
 
@@ -367,11 +371,13 @@ def recommend_properties_route(
     """Parse a natural-language request, fetch listings, and explain the best matches."""
     try:
         filters, parser_model_name = parse_property_search_query(query=payload.query, limit=payload.limit)
-        records = search_property_listings(db=db, filters=filters)
+        records, match_strategy, advisory_note = search_property_listings_with_fallback(db=db, filters=filters)
         answer, recommendation_model_name = recommend_property_results(
             query=payload.query,
             filters=filters,
             listings=records,
+            match_strategy=match_strategy,
+            advisory_note=advisory_note,
         )
     except SQLAlchemyError as exc:
         log_event(logger, logging.ERROR, "property_recommendation_failed_database", query=payload.query, error=str(exc))
@@ -389,6 +395,7 @@ def recommend_properties_route(
         count=len(items),
         parser_model_name=parser_model_name,
         recommendation_model_name=recommendation_model_name,
+        match_strategy=match_strategy,
     )
     return PropertyRecommendationResponse(
         items=items,
@@ -397,4 +404,6 @@ def recommend_properties_route(
         parser_model_name=parser_model_name,
         recommendation_model_name=recommendation_model_name,
         answer=answer,
+        match_strategy=match_strategy,
+        advisory_note=advisory_note,
     )

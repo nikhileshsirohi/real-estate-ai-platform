@@ -172,3 +172,35 @@ def search_property_listings(
 
     stmt = stmt.limit(filters.limit)
     return list(db.scalars(stmt).all())
+
+
+def search_property_listings_with_fallback(
+    db: Session,
+    filters: PropertySearchFilters,
+) -> tuple[list[PropertyListing], str, str | None]:
+    """Search exactly first, then relax the budget cap to return closest matches if needed."""
+    exact_matches = search_property_listings(db=db, filters=filters)
+    if exact_matches:
+        return exact_matches, "exact", None
+
+    if filters.max_price_usd is None:
+        return [], "exact", "No listings matched the current non-price filters."
+
+    relaxed_filters = filters.model_copy(deep=True)
+    budget_cap = relaxed_filters.max_price_usd
+    relaxed_filters.max_price_usd = None
+
+    stmt = _apply_property_filters(select(PropertyListing), relaxed_filters)
+    stmt = stmt.order_by(func.abs(PropertyListing.asking_price_usd - budget_cap).asc()).limit(filters.limit)
+    fallback_matches = list(db.scalars(stmt).all())
+
+    if not fallback_matches:
+        return [], "exact", "No listings matched even after relaxing the budget cap."
+
+    cheapest_match = min(listing.asking_price_usd for listing in fallback_matches)
+    advisory_note = (
+        "No exact matches were found under the requested budget. "
+        f"Showing closest matches instead. Cheapest nearby match is ${cheapest_match:,.0f} "
+        f"versus requested max ${budget_cap:,.0f}."
+    )
+    return fallback_matches, "closest_match", advisory_note

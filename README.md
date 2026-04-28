@@ -208,6 +208,11 @@ This route:
 - asks Ollama to explain the matched rows only
 - returns both the listings and a grounded recommendation summary
 
+If no exact matches are found under the requested budget, the query-based search flows now return:
+- `match_strategy: "closest_match"`
+- a short `advisory_note`
+- the nearest higher-priced alternatives that still satisfy the other filters
+
 ## Observability
 The API now emits structured JSON logs for:
 - application startup
