@@ -9,14 +9,17 @@ def build_market_prompt(question: str, retrieved_context: str) -> str:
     """Build a grounded advisory prompt from retrieved context."""
     return (
         "You are a real estate market advisor. Use only the provided context to answer.\n"
-        "If the context is insufficient, say that clearly.\n"
+        "Do not use outside knowledge.\n"
+        "If the context is weak, broad, or insufficient, say that clearly.\n"
+        "Do not make city-level, neighborhood-level, or property-level claims unless the context directly supports them.\n"
         "Be concise, practical, and factual.\n\n"
         f"Question:\n{question}\n\n"
         f"Context:\n{retrieved_context}\n\n"
         "Answer with:\n"
         "1. A short direct answer\n"
         "2. A brief explanation grounded in the context\n"
-        "3. A short limitations note if needed"
+        "3. A short limitations note\n"
+        "If the context is only statewide or planning-oriented, explicitly say that."
     )
 
 
@@ -30,8 +33,10 @@ def build_property_advisory_prompt(
     return (
         "You are a real estate price and market advisor.\n"
         "Use the provided model estimate and retrieved context only.\n"
-        "Do not invent neighborhood facts that are not in the context.\n"
-        "If context is limited, say so clearly.\n\n"
+        "Do not invent neighborhood facts, local comps, or area-specific claims that are not in the context.\n"
+        "Do not present statewide demographic context as direct evidence for this exact property.\n"
+        "If context is broad or planning-oriented, say so clearly.\n"
+        "If the retrieved sources are weak for this property question, be conservative.\n\n"
         f"Property summary:\n{property_summary}\n\n"
         f"Predicted price (in 100,000 USD units): {predicted_price:.4f}\n"
         f"Predicted price (approx USD): ${predicted_price * 100000:,.0f}\n\n"
@@ -40,7 +45,7 @@ def build_property_advisory_prompt(
         "Answer with:\n"
         "1. A short direct answer\n"
         "2. A practical interpretation of the model estimate\n"
-        "3. A short market-context explanation grounded in the retrieved sources\n"
+        "3. A short market-context explanation grounded in the retrieved sources only\n"
         "4. A short limitations note"
     )
 
