@@ -1,0 +1,16 @@
+listing_code,title,city,locality,property_type,bedrooms,bathrooms,area_sqft,asking_price_usd,description,latitude,longitude
+CA-SF-001,Sunset Family House,San Francisco,Sunset District,house,3,2.0,1580,1295000,Three-bedroom family house with updated kitchen and backyard access near transit.,37.753,-122.494
+CA-SF-002,SoMa Loft Condo,San Francisco,SoMa,condo,2,2.0,1180,989000,Modern condo loft with open plan living and walkable downtown access.,37.778,-122.405
+CA-SF-003,Richmond Starter Condo,San Francisco,Richmond District,condo,1,1.0,720,699000,Compact starter condo suited for first-time buyers looking for west-side access.,37.780,-122.482
+CA-SJ-001,Willow Glen Townhouse,San Jose,Willow Glen,townhouse,3,2.5,1490,1095000,Well-kept townhouse with garage parking and flexible work-from-home layout.,37.301,-121.900
+CA-SJ-002,North San Jose Apartment,San Jose,North San Jose,apartment,2,2.0,960,785000,Two-bedroom apartment-style unit near major employers and freeway connections.,37.387,-121.930
+CA-SJ-003,Almaden Valley House,San Jose,Almaden Valley,house,4,3.0,2140,1495000,Spacious house with larger lot and strong family-home appeal.,37.217,-121.860
+CA-OAK-001,Lake Merritt Condo,Oakland,Lake Merritt,condo,2,2.0,1040,725000,Condo close to Lake Merritt with balanced commute access and urban amenities.,37.809,-122.257
+CA-OAK-002,Rockridge House,Oakland,Rockridge,house,3,2.0,1710,1325000,Charming house near shopping and BART with strong owner-occupier appeal.,37.845,-122.252
+CA-OAK-003,Temescal Townhouse,Oakland,Temescal,townhouse,2,2.5,1280,865000,Two-level townhouse with newer finishes and neighborhood retail access.,37.838,-122.262
+CA-SD-001,La Jolla Coastal Condo,San Diego,La Jolla,condo,2,2.0,1125,1210000,Premium coastal condo with strong lifestyle positioning and nearby amenities.,32.832,-117.271
+CA-SD-002,North Park Starter House,San Diego,North Park,house,2,1.0,980,895000,Starter house in a popular neighborhood with renovation upside.,32.744,-117.130
+CA-SD-003,Mission Valley Apartment,San Diego,Mission Valley,apartment,1,1.0,690,545000,Entry-level apartment near retail hubs and major transport links.,32.777,-117.149
+CA-SAC-001,East Sacramento House,Sacramento,East Sacramento,house,3,2.0,1650,699000,Classic family house in a stable residential pocket with good local access.,38.566,-121.450
+CA-SAC-002,Midtown Condo,Sacramento,Midtown,condo,1,1.0,760,419000,Urban condo for buyers seeking central access and lower price entry.,38.573,-121.482
+CA-SAC-003,Natomas Townhouse,Sacramento,Natomas,townhouse,3,2.5,1420,498000,Affordable townhouse option with practical layout and suburban access.,38.646,-121.507

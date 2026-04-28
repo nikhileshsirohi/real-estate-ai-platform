@@ -8,6 +8,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from src.api.schemas import PropertySearchFilters
 from src.api.main import app
 from src.api.routes import get_db
 
@@ -88,6 +89,7 @@ def test_root_returns_api_summary() -> None:
     assert response_body["docs"] == "/docs"
     assert response_body["health"] == "/health"
     assert response_body["predictions"] == "/predictions?limit=10"
+    assert response_body["search_properties"] == "/search-properties?city=San%20Jose&max_price_usd=900000"
 
 
 def test_health_check_returns_ok() -> None:
@@ -211,3 +213,81 @@ def test_advise_property_returns_property_advice() -> None:
     assert response_body["model_name"] == "qwen2.5:14b"
     assert response_body["predicted_price"] == 3.95
     assert response_body["predicted_price_usd"] == 395000.0
+
+
+def test_search_properties_returns_filtered_items() -> None:
+    with patch("src.api.routes.search_property_listings") as mocked_search:
+        mocked_search.return_value = [
+            SimpleNamespace(
+                id=10,
+                listing_code="CA-SJ-002",
+                title="North San Jose Apartment",
+                city="San Jose",
+                locality="North San Jose",
+                property_type="apartment",
+                bedrooms=2,
+                bathrooms=2.0,
+                area_sqft=960.0,
+                asking_price_usd=785000.0,
+                description="Two-bedroom apartment-style unit near major employers.",
+                latitude=37.387,
+                longitude=-121.93,
+                created_at=datetime(2026, 4, 28, 12, 0, tzinfo=timezone.utc),
+            )
+        ]
+
+        response = client.get("/search-properties?city=San%20Jose&max_price_usd=900000")
+
+    assert response.status_code == 200
+    response_body = response.json()
+    assert response_body["count"] == 1
+    assert response_body["items"][0]["listing_code"] == "CA-SJ-002"
+    assert response_body["applied_filters"]["city"] == "San Jose"
+
+
+def test_search_properties_query_parses_and_returns_items() -> None:
+    with (
+        patch("src.api.routes.parse_property_search_query") as mocked_parse,
+        patch("src.api.routes.search_property_listings") as mocked_search,
+    ):
+        mocked_parse.return_value = (
+            PropertySearchFilters(
+                city="Oakland",
+                property_type="condo",
+                max_price_usd=800000.0,
+                min_bedrooms=2,
+                limit=5,
+                sort_by="asking_price_usd",
+                sort_order="asc",
+            ),
+            "qwen2.5-coder:7b-instruct",
+        )
+        mocked_search.return_value = [
+            SimpleNamespace(
+                id=11,
+                listing_code="CA-OAK-001",
+                title="Lake Merritt Condo",
+                city="Oakland",
+                locality="Lake Merritt",
+                property_type="condo",
+                bedrooms=2,
+                bathrooms=2.0,
+                area_sqft=1040.0,
+                asking_price_usd=725000.0,
+                description="Condo close to Lake Merritt.",
+                latitude=37.809,
+                longitude=-122.257,
+                created_at=datetime(2026, 4, 28, 12, 5, tzinfo=timezone.utc),
+            )
+        ]
+
+        response = client.post(
+            "/search-properties/query",
+            json={"query": "Find me a 2 bedroom condo in Oakland under 800000", "limit": 5},
+        )
+
+    assert response.status_code == 200
+    response_body = response.json()
+    assert response_body["count"] == 1
+    assert response_body["parser_model_name"] == "qwen2.5-coder:7b-instruct"
+    assert response_body["items"][0]["city"] == "Oakland"

@@ -74,3 +74,52 @@ class PropertyAdviceResponse(BaseModel):
     predicted_price: float
     predicted_price_usd: float
     sources: list[MarketAdviceSource]
+
+
+class PropertySearchFilters(BaseModel):
+    city: str | None = None
+    locality: str | None = None
+    property_type: str | None = None
+    min_price_usd: float | None = Field(default=None, ge=0)
+    max_price_usd: float | None = Field(default=None, ge=0)
+    min_bedrooms: int | None = Field(default=None, ge=0)
+    max_bedrooms: int | None = Field(default=None, ge=0)
+    min_bathrooms: float | None = Field(default=None, ge=0)
+    max_bathrooms: float | None = Field(default=None, ge=0)
+    min_area_sqft: float | None = Field(default=None, ge=0)
+    max_area_sqft: float | None = Field(default=None, ge=0)
+    limit: int = Field(default=10, ge=1, le=50)
+    sort_by: str = Field(default="asking_price_usd")
+    sort_order: str = Field(default="asc")
+
+
+class PropertyListingItem(BaseModel):
+    id: int
+    listing_code: str
+    title: str
+    city: str
+    locality: str
+    property_type: str
+    bedrooms: int
+    bathrooms: float
+    area_sqft: float
+    asking_price_usd: float
+    description: str
+    latitude: float
+    longitude: float
+    created_at: datetime
+
+
+class PropertySearchResponse(BaseModel):
+    items: list[PropertyListingItem]
+    count: int
+    applied_filters: PropertySearchFilters
+
+
+class PropertySearchQueryRequest(BaseModel):
+    query: str = Field(..., min_length=4)
+    limit: int = Field(default=10, ge=1, le=50)
+
+
+class PropertySearchQueryResponse(PropertySearchResponse):
+    parser_model_name: str

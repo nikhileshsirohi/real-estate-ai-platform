@@ -1,10 +1,10 @@
-"""Repository helpers for prediction persistence."""
+"""Repository helpers for prediction persistence and property search."""
 
-from sqlalchemy import select
+from sqlalchemy import Select, func, select
 from sqlalchemy.orm import Session
 
-from src.api.schemas import PricePredictionRequest
-from src.db.models import PredictionRecord
+from src.api.schemas import PricePredictionRequest, PropertySearchFilters
+from src.db.models import PredictionRecord, PropertyListing
 
 
 def save_prediction_record(
@@ -66,4 +66,109 @@ def filter_prediction_records(
         stmt = stmt.where(PredictionRecord.predicted_price <= max_predicted_price)
 
     stmt = stmt.order_by(PredictionRecord.id.desc()).limit(limit)
+    return list(db.scalars(stmt).all())
+
+
+def upsert_property_listing(
+    db: Session,
+    *,
+    listing_code: str,
+    title: str,
+    city: str,
+    locality: str,
+    property_type: str,
+    bedrooms: int,
+    bathrooms: float,
+    area_sqft: float,
+    asking_price_usd: float,
+    description: str,
+    latitude: float,
+    longitude: float,
+) -> PropertyListing:
+    """Insert or update a property listing using listing_code as the stable key."""
+    stmt = select(PropertyListing).where(PropertyListing.listing_code == listing_code)
+    record = db.scalar(stmt)
+
+    if record is None:
+        record = PropertyListing(
+            listing_code=listing_code,
+            title=title,
+            city=city,
+            locality=locality,
+            property_type=property_type,
+            bedrooms=bedrooms,
+            bathrooms=bathrooms,
+            area_sqft=area_sqft,
+            asking_price_usd=asking_price_usd,
+            description=description,
+            latitude=latitude,
+            longitude=longitude,
+        )
+        db.add(record)
+    else:
+        record.title = title
+        record.city = city
+        record.locality = locality
+        record.property_type = property_type
+        record.bedrooms = bedrooms
+        record.bathrooms = bathrooms
+        record.area_sqft = area_sqft
+        record.asking_price_usd = asking_price_usd
+        record.description = description
+        record.latitude = latitude
+        record.longitude = longitude
+
+    db.commit()
+    db.refresh(record)
+    return record
+
+
+def _apply_property_filters(stmt: Select, filters: PropertySearchFilters) -> Select:
+    """Apply structured property filters to a SQLAlchemy select."""
+    if filters.city:
+        stmt = stmt.where(func.lower(PropertyListing.city) == filters.city.lower())
+    if filters.locality:
+        stmt = stmt.where(func.lower(PropertyListing.locality).contains(filters.locality.lower()))
+    if filters.property_type:
+        stmt = stmt.where(func.lower(PropertyListing.property_type) == filters.property_type.lower())
+    if filters.min_price_usd is not None:
+        stmt = stmt.where(PropertyListing.asking_price_usd >= filters.min_price_usd)
+    if filters.max_price_usd is not None:
+        stmt = stmt.where(PropertyListing.asking_price_usd <= filters.max_price_usd)
+    if filters.min_bedrooms is not None:
+        stmt = stmt.where(PropertyListing.bedrooms >= filters.min_bedrooms)
+    if filters.max_bedrooms is not None:
+        stmt = stmt.where(PropertyListing.bedrooms <= filters.max_bedrooms)
+    if filters.min_bathrooms is not None:
+        stmt = stmt.where(PropertyListing.bathrooms >= filters.min_bathrooms)
+    if filters.max_bathrooms is not None:
+        stmt = stmt.where(PropertyListing.bathrooms <= filters.max_bathrooms)
+    if filters.min_area_sqft is not None:
+        stmt = stmt.where(PropertyListing.area_sqft >= filters.min_area_sqft)
+    if filters.max_area_sqft is not None:
+        stmt = stmt.where(PropertyListing.area_sqft <= filters.max_area_sqft)
+    return stmt
+
+
+def search_property_listings(
+    db: Session,
+    filters: PropertySearchFilters,
+) -> list[PropertyListing]:
+    """Search property listings using structured filters and sorting."""
+    stmt = _apply_property_filters(select(PropertyListing), filters)
+
+    sort_column = PropertyListing.asking_price_usd
+    if filters.sort_by == "area_sqft":
+        sort_column = PropertyListing.area_sqft
+    elif filters.sort_by == "bedrooms":
+        sort_column = PropertyListing.bedrooms
+    elif filters.sort_by == "created_at":
+        sort_column = PropertyListing.created_at
+
+    if filters.sort_order.lower() == "desc":
+        stmt = stmt.order_by(sort_column.desc())
+    else:
+        stmt = stmt.order_by(sort_column.asc())
+
+    stmt = stmt.limit(filters.limit)
     return list(db.scalars(stmt).all())

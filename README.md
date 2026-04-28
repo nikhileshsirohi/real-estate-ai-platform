@@ -154,6 +154,38 @@ History endpoint:
 - `GET /predictions?limit=10&model_name=xgboost`
 - `GET /predictions?limit=10&min_predicted_price=3.0&max_predicted_price=5.0`
 
+## Property Search
+The project now includes a seed property-listings dataset so you can test structured and natural-language property search locally without a private MLS feed.
+
+Seed dataset:
+- `data/sample/property_listings_seed.csv`
+
+Load sample listings into PostgreSQL:
+
+```bash
+alembic upgrade head
+python -m src.data.load_property_listings
+```
+
+Structured property search:
+
+```bash
+curl "http://127.0.0.1:8000/search-properties?city=San%20Jose&max_price_usd=900000&limit=5"
+```
+
+Natural-language property search:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/search-properties/query" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Find me a 2 bedroom condo in Oakland under 800000",
+    "limit": 5
+  }'
+```
+
+The natural-language flow uses Ollama only to parse the request into structured filters. The actual property retrieval still happens through PostgreSQL filters, which keeps the search deterministic and easy to debug.
+
 ## Observability
 The API now emits structured JSON logs for:
 - application startup
@@ -240,6 +272,10 @@ Keep notebook work separated by purpose:
 - `notebooks/01_eda.ipynb`: data understanding and skew/outlier analysis
 - `notebooks/02_model_comparison.ipynb`: baseline model comparison
 - `notebooks/03_tuned_xgboost.ipynb`: XGBoost tuning and best-model export
+- `notebooks/04_rag_corpus_and_retrieval.ipynb`: build and inspect the local knowledge index
+- `notebooks/05_ollama_rag_qa.ipynb`: test market Q&A over retrieved context
+- `notebooks/06_property_advisory_rag.ipynb`: combine prediction with conservative market context
+- `notebooks/07_property_search_llm.ipynb`: load listings and test LLM-assisted property search
 
 ## RAG Starter
 The project now includes a starter local knowledge corpus built from official California sources so you can begin RAG work without a private dataset.

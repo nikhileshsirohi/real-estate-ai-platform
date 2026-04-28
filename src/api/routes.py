@@ -9,11 +9,16 @@ from sqlalchemy.orm import Session
 from src.api.schemas import (
     MarketAdviceResponse,
     MarketQuestionRequest,
+    PropertyListingItem,
     PropertyAdviceRequest,
     PropertyAdviceResponse,
     PredictionDetailResponse,
     PredictionHistoryItem,
     PredictionHistoryResponse,
+    PropertySearchFilters,
+    PropertySearchQueryRequest,
+    PropertySearchQueryResponse,
+    PropertySearchResponse,
     PricePredictionRequest,
     PricePredictionResponse,
 )
@@ -21,11 +26,13 @@ from src.db.repository import (
     filter_prediction_records,
     get_prediction_record_by_id,
     list_recent_prediction_records,
+    search_property_listings,
     save_prediction_record,
 )
 from src.db.session import get_db
 from src.inference.predictor import load_model_name, predict_price
 from src.rag.service import ask_market_question, ask_property_question
+from src.search.parser import parse_property_search_query
 from src.utils.logger import get_logger, log_event
 
 
@@ -41,6 +48,7 @@ def root() -> dict[str, str]:
         "docs": "/docs",
         "health": "/health",
         "predictions": "/predictions?limit=10",
+        "search_properties": "/search-properties?city=San%20Jose&max_price_usd=900000",
     }
 
 
@@ -243,3 +251,105 @@ def advise_property_route(payload: PropertyAdviceRequest) -> PropertyAdviceRespo
         source_count=len(result["sources"]),
     )
     return PropertyAdviceResponse(**result)
+
+
+def _to_property_listing_items(records) -> list[PropertyListingItem]:
+    """Convert property listing ORM records into response items."""
+    return [
+        PropertyListingItem(
+            id=record.id,
+            listing_code=record.listing_code,
+            title=record.title,
+            city=record.city,
+            locality=record.locality,
+            property_type=record.property_type,
+            bedrooms=record.bedrooms,
+            bathrooms=record.bathrooms,
+            area_sqft=record.area_sqft,
+            asking_price_usd=record.asking_price_usd,
+            description=record.description,
+            latitude=record.latitude,
+            longitude=record.longitude,
+            created_at=record.created_at,
+        )
+        for record in records
+    ]
+
+
+@router.get("/search-properties", response_model=PropertySearchResponse)
+def search_properties_route(
+    city: str | None = None,
+    locality: str | None = None,
+    property_type: str | None = None,
+    min_price_usd: float | None = None,
+    max_price_usd: float | None = None,
+    min_bedrooms: int | None = None,
+    max_bedrooms: int | None = None,
+    min_bathrooms: float | None = None,
+    max_bathrooms: float | None = None,
+    min_area_sqft: float | None = None,
+    max_area_sqft: float | None = None,
+    limit: int = 10,
+    sort_by: str = "asking_price_usd",
+    sort_order: str = "asc",
+    db: Session = Depends(get_db),
+) -> PropertySearchResponse:
+    """Search property listings using explicit structured filters."""
+    filters = PropertySearchFilters(
+        city=city,
+        locality=locality,
+        property_type=property_type,
+        min_price_usd=min_price_usd,
+        max_price_usd=max_price_usd,
+        min_bedrooms=min_bedrooms,
+        max_bedrooms=max_bedrooms,
+        min_bathrooms=min_bathrooms,
+        max_bathrooms=max_bathrooms,
+        min_area_sqft=min_area_sqft,
+        max_area_sqft=max_area_sqft,
+        limit=limit,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
+    try:
+        records = search_property_listings(db=db, filters=filters)
+    except SQLAlchemyError as exc:
+        log_event(logger, logging.ERROR, "property_search_failed", error=str(exc))
+        raise HTTPException(status_code=500, detail=f"Property search failed: {exc}")
+
+    items = _to_property_listing_items(records)
+    log_event(logger, logging.INFO, "property_search_completed", count=len(items), filters=filters.model_dump())
+    return PropertySearchResponse(items=items, count=len(items), applied_filters=filters)
+
+
+@router.post("/search-properties/query", response_model=PropertySearchQueryResponse)
+def search_properties_by_query_route(
+    payload: PropertySearchQueryRequest,
+    db: Session = Depends(get_db),
+) -> PropertySearchQueryResponse:
+    """Parse a natural-language property search request, then query PostgreSQL."""
+    try:
+        filters, parser_model_name = parse_property_search_query(query=payload.query, limit=payload.limit)
+        records = search_property_listings(db=db, filters=filters)
+    except SQLAlchemyError as exc:
+        log_event(logger, logging.ERROR, "property_search_query_failed_database", query=payload.query, error=str(exc))
+        raise HTTPException(status_code=500, detail=f"Property search failed: {exc}")
+    except Exception as exc:
+        log_event(logger, logging.ERROR, "property_search_query_failed_parser", query=payload.query, error=str(exc))
+        raise HTTPException(status_code=500, detail=f"Property query parsing failed: {exc}")
+
+    items = _to_property_listing_items(records)
+    log_event(
+        logger,
+        logging.INFO,
+        "property_search_query_completed",
+        query=payload.query,
+        count=len(items),
+        parser_model_name=parser_model_name,
+    )
+    return PropertySearchQueryResponse(
+        items=items,
+        count=len(items),
+        applied_filters=filters,
+        parser_model_name=parser_model_name,
+    )
