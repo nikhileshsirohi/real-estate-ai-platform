@@ -4,9 +4,12 @@ import time
 
 from fastapi import FastAPI
 from fastapi import Request
+from fastapi.staticfiles import StaticFiles
 
 from src.api.routes import router
 from src.db.session import AUTO_CREATE_TABLES, create_db_tables
+from src.monitoring.runtime import runtime_monitor
+from src.utils.config_loader import resolve_project_path
 from src.utils.logger import get_logger, log_event, setup_logging
 
 
@@ -18,6 +21,11 @@ app = FastAPI(
     title="Real Estate AI Platform",
     version="0.1.0",
     description="V1 API for real estate price prediction.",
+)
+app.mount(
+    "/assets",
+    StaticFiles(directory=resolve_project_path("frontend/assets")),
+    name="assets",
 )
 
 
@@ -39,6 +47,11 @@ async def log_requests(request: Request, call_next):
         return response
     finally:
         duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
+        runtime_monitor.record(
+            path=request.url.path,
+            status_code=response.status_code if response is not None else 500,
+            duration_ms=duration_ms,
+        )
         log_event(
             logger,
             20,

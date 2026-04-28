@@ -136,3 +136,16 @@ class PropertyRecommendationRequest(BaseModel):
 class PropertyRecommendationResponse(PropertySearchQueryResponse):
     recommendation_model_name: str
     answer: str
+
+
+class MonitoringSummaryResponse(BaseModel):
+    runtime: dict
+    database: dict
+    model: dict
+    rag_index: dict
+
+
+class EvaluationSummaryResponse(BaseModel):
+    model_evaluation: dict
+    rag_evaluation: dict
+    inventory_evaluation: dict

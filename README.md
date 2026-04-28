@@ -113,6 +113,20 @@ Root API summary:
 curl http://127.0.0.1:8000/
 ```
 
+Interactive frontend:
+
+```bash
+open http://127.0.0.1:8000/app
+```
+
+The frontend lets you interact with:
+- price prediction
+- market Q&A
+- property advisory
+- property search
+- property recommendation
+- monitoring/evaluation snapshots
+
 Prediction history:
 
 ```bash
@@ -235,6 +249,20 @@ Typical logged fields include:
 - `prediction_id`
 - `model_name`
 
+Lightweight monitoring/evaluation endpoints are also available:
+
+```bash
+curl http://127.0.0.1:8000/monitoring/summary
+curl http://127.0.0.1:8000/evaluation/summary
+```
+
+These expose:
+- runtime request/error counters
+- database inventory counts
+- current model metrics from saved artifacts
+- RAG index metadata
+- city-level property inventory summary
+
 ## Next Improvement Ideas
 - Add a dedicated PostgreSQL prediction log
 - Add geospatial features or neighborhood clustering
@@ -312,6 +340,7 @@ Keep notebook work separated by purpose:
 - `notebooks/08_property_recommendation.ipynb`: explain and recommend matched property search results
 - `notebooks/09_local_inventory_and_area_rag.ipynb`: reload expanded listings and rebuild/test local area RAG
 - `notebooks/10_property_advisory_local_context.ipynb`: test property advice with nearby demo listing context
+- `notebooks/11_monitoring_and_evaluation.ipynb`: inspect monitoring and evaluation summaries
 
 ## RAG Starter
 The project now includes a starter local knowledge corpus built from official California sources so you can begin RAG work without a private dataset.

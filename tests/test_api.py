@@ -91,6 +91,15 @@ def test_root_returns_api_summary() -> None:
     assert response_body["predictions"] == "/predictions?limit=10"
     assert response_body["search_properties"] == "/search-properties?city=San%20Jose&max_price_usd=900000"
     assert response_body["recommend_properties"] == "/search-properties/recommend"
+    assert response_body["frontend"] == "/app"
+
+
+def test_frontend_app_route_returns_html() -> None:
+    response = client.get("/app")
+
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    assert "Real Estate Price Intelligence & Advisory" in response.text
 
 
 def test_health_check_returns_ok() -> None:
@@ -98,6 +107,82 @@ def test_health_check_returns_ok() -> None:
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_monitoring_summary_returns_snapshot() -> None:
+    with patch("src.api.routes.build_monitoring_summary") as mocked_summary:
+        mocked_summary.return_value = {
+            "runtime": {
+                "total_requests": 3,
+                "error_requests": 0,
+                "error_rate": 0.0,
+                "average_duration_ms": 12.5,
+                "path_counts": {"/health": 1},
+                "path_error_counts": {},
+            },
+            "database": {
+                "prediction_record_count": 2,
+                "property_listing_count": 30,
+                "distinct_city_count": 5,
+                "min_listing_price_usd": 365000.0,
+                "max_listing_price_usd": 1495000.0,
+            },
+            "model": {
+                "artifact_found": True,
+                "artifact_path": "models/xgboost_price_model_metrics.json",
+                "metrics": {"rmse": 0.43, "mae": 0.28, "r2": 0.85},
+                "best_available_model": "xgboost_price_model_tuned_clean.joblib",
+            },
+            "rag_index": {
+                "artifact_found": True,
+                "artifact_path": "data/knowledge/index/index_metadata.json",
+                "embedding_provider": "ollama",
+                "embedding_model_name": "nomic-embed-text:latest",
+                "vector_dimension": 768,
+                "document_count": 5,
+                "chunk_count": 19,
+            },
+        }
+        response = client.get("/monitoring/summary")
+
+    assert response.status_code == 200
+    response_body = response.json()
+    assert "runtime" in response_body
+    assert "database" in response_body
+    assert "model" in response_body
+    assert "rag_index" in response_body
+
+
+def test_evaluation_summary_returns_snapshot() -> None:
+    with patch("src.api.routes.build_evaluation_summary") as mocked_summary:
+        mocked_summary.return_value = {
+            "model_evaluation": {
+                "artifact_found": True,
+                "artifact_path": "models/xgboost_price_model_metrics.json",
+                "metrics": {"rmse": 0.43, "mae": 0.28, "r2": 0.85},
+                "best_available_model": "xgboost_price_model_tuned_clean.joblib",
+            },
+            "rag_evaluation": {
+                "artifact_found": True,
+                "artifact_path": "data/knowledge/index/index_metadata.json",
+                "embedding_provider": "ollama",
+                "embedding_model_name": "nomic-embed-text:latest",
+                "vector_dimension": 768,
+                "document_count": 5,
+                "chunk_count": 19,
+            },
+            "inventory_evaluation": {
+                "cities": [{"city": "Oakland", "listing_count": 6, "min_price_usd": 565000.0, "max_price_usd": 1490000.0}],
+                "total_cities": 5,
+            },
+        }
+        response = client.get("/evaluation/summary")
+
+    assert response.status_code == 200
+    response_body = response.json()
+    assert "model_evaluation" in response_body
+    assert "rag_evaluation" in response_body
+    assert "inventory_evaluation" in response_body
 
 
 def test_list_predictions_returns_history() -> None:

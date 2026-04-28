@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real Estate AI Platform</title>
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">AI/ML + RAG Demo Workspace</p>
+          <h1>Real Estate Price Intelligence & Advisory</h1>
+          <p class="hero-copy">
+            Predict property prices, ask market questions, search seeded inventory, and inspect monitoring data from one
+            frontend.
+          </p>
+        </div>
+        <div class="hero-badges">
+          <span>FastAPI</span>
+          <span>XGBoost</span>
+          <span>PostgreSQL</span>
+          <span>Ollama</span>
+          <span>FAISS</span>
+        </div>
+      </header>
+
+      <main class="dashboard-grid">
+        <section class="panel panel-wide">
+          <div class="panel-header">
+            <h2>Monitoring Snapshot</h2>
+            <button id="refresh-monitoring" class="ghost-button">Refresh</button>
+          </div>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-label">Total Requests</span>
+              <strong id="metric-total-requests">-</strong>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Average Duration</span>
+              <strong id="metric-average-duration">-</strong>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Prediction Records</span>
+              <strong id="metric-prediction-records">-</strong>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Property Listings</span>
+              <strong id="metric-property-listings">-</strong>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Model RMSE</span>
+              <strong id="metric-rmse">-</strong>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">RAG Documents</span>
+              <strong id="metric-rag-documents">-</strong>
+            </div>
+          </div>
+          <pre id="monitoring-json" class="code-block"></pre>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Predict Price</h2>
+          </div>
+          <form id="predict-form" class="form-grid">
+            <input name="median_income" type="number" step="0.0001" value="8.3252" placeholder="Median income" />
+            <input name="house_age" type="number" step="0.1" value="41" placeholder="House age" />
+            <input name="average_rooms" type="number" step="0.0001" value="6.984127" placeholder="Average rooms" />
+            <input name="average_bedrooms" type="number" step="0.0001" value="1.02381" placeholder="Average bedrooms" />
+            <input name="population" type="number" step="1" value="322" placeholder="Population" />
+            <input name="average_occupancy" type="number" step="0.0001" value="2.555556" placeholder="Average occupancy" />
+            <input name="latitude" type="number" step="0.0001" value="37.809" placeholder="Latitude" />
+            <input name="longitude" type="number" step="0.0001" value="-122.257" placeholder="Longitude" />
+            <button type="submit" class="primary-button">Predict</button>
+          </form>
+          <pre id="predict-output" class="code-block"></pre>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Ask Market</h2>
+          </div>
+          <form id="market-form" class="stack-form">
+            <textarea name="question" rows="5">Which demo city looks more affordable for a lower-entry buyer, Sacramento or San Francisco?</textarea>
+            <button type="submit" class="primary-button">Ask</button>
+          </form>
+          <pre id="market-output" class="code-block"></pre>
+        </section>
+
+        <section class="panel panel-wide">
+          <div class="panel-header">
+            <h2>Advise Property</h2>
+          </div>
+          <form id="advice-form" class="form-grid">
+            <textarea name="question" rows="4" class="full-span">How should I interpret this predicted price for a buyer who wants Oakland city access?</textarea>
+            <input name="median_income" type="number" step="0.0001" value="8.3252" />
+            <input name="house_age" type="number" step="0.1" value="41" />
+            <input name="average_rooms" type="number" step="0.0001" value="6.984127" />
+            <input name="average_bedrooms" type="number" step="0.0001" value="1.02381" />
+            <input name="population" type="number" step="1" value="322" />
+            <input name="average_occupancy" type="number" step="0.0001" value="2.555556" />
+            <input name="latitude" type="number" step="0.0001" value="37.809" />
+            <input name="longitude" type="number" step="0.0001" value="-122.257" />
+            <button type="submit" class="primary-button">Advise</button>
+          </form>
+          <pre id="advice-output" class="code-block"></pre>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Search Inventory</h2>
+          </div>
+          <form id="search-form" class="stack-form">
+            <textarea name="query" rows="4">Find me a family-friendly home in Oakland near BART</textarea>
+            <input name="limit" type="number" value="5" min="1" max="20" />
+            <button type="submit" class="primary-button">Search</button>
+          </form>
+          <pre id="search-output" class="code-block"></pre>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Recommend Listings</h2>
+          </div>
+          <form id="recommend-form" class="stack-form">
+            <textarea name="query" rows="4">Find me a 2 BHK in Oakland under 80 lakh</textarea>
+            <input name="limit" type="number" value="5" min="1" max="20" />
+            <button type="submit" class="primary-button">Recommend</button>
+          </form>
+          <pre id="recommend-output" class="code-block"></pre>
+        </section>
+
+        <section class="panel panel-wide">
+          <div class="panel-header">
+            <h2>Evaluation Snapshot</h2>
+          </div>
+          <pre id="evaluation-json" class="code-block"></pre>
+        </section>
+      </main>
+    </div>
+
+    <script src="/assets/app.js" defer></script>
+  </body>
+</html>

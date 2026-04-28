@@ -3,12 +3,15 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import FileResponse
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from src.api.schemas import (
+    EvaluationSummaryResponse,
     MarketAdviceResponse,
     MarketQuestionRequest,
+    MonitoringSummaryResponse,
     PropertyListingItem,
     PropertyAdviceRequest,
     PropertyAdviceResponse,
@@ -34,10 +37,12 @@ from src.db.repository import (
 )
 from src.db.session import get_db
 from src.inference.predictor import load_model_name, predict_price
+from src.monitoring.service import build_evaluation_summary, build_monitoring_summary
 from src.rag.service import ask_market_question, ask_property_question
 from src.search.advisor import recommend_property_results
 from src.search.parser import parse_property_search_query
 from src.search.preferences import detect_search_preferences, rerank_property_listings
+from src.utils.config_loader import resolve_project_path
 from src.utils.logger import get_logger, log_event
 
 
@@ -55,13 +60,60 @@ def root() -> dict[str, str]:
         "predictions": "/predictions?limit=10",
         "search_properties": "/search-properties?city=San%20Jose&max_price_usd=900000",
         "recommend_properties": "/search-properties/recommend",
+        "monitoring": "/monitoring/summary",
+        "evaluation": "/evaluation/summary",
+        "frontend": "/app",
     }
+
+
+@router.get("/app", response_class=FileResponse)
+def frontend_app_route() -> FileResponse:
+    """Serve the single-page frontend for interactive demos."""
+    return FileResponse(resolve_project_path("frontend/index.html"))
 
 
 @router.get("/health")
 def health_check() -> dict[str, str]:
     """Simple health endpoint for quick service checks."""
     return {"status": "ok"}
+
+
+@router.get("/monitoring/summary", response_model=MonitoringSummaryResponse)
+def monitoring_summary_route(db: Session = Depends(get_db)) -> MonitoringSummaryResponse:
+    """Return a lightweight operational summary for the current app state."""
+    try:
+        summary = build_monitoring_summary(db)
+    except SQLAlchemyError as exc:
+        log_event(logger, logging.ERROR, "monitoring_summary_failed", error=str(exc))
+        raise HTTPException(status_code=500, detail=f"Monitoring summary failed: {exc}")
+
+    log_event(
+        logger,
+        logging.INFO,
+        "monitoring_summary_fetched",
+        total_requests=summary["runtime"]["total_requests"],
+        property_listing_count=summary["database"]["property_listing_count"],
+    )
+    return MonitoringSummaryResponse(**summary)
+
+
+@router.get("/evaluation/summary", response_model=EvaluationSummaryResponse)
+def evaluation_summary_route(db: Session = Depends(get_db)) -> EvaluationSummaryResponse:
+    """Return a recruiter/demo-friendly evaluation snapshot."""
+    try:
+        summary = build_evaluation_summary(db)
+    except SQLAlchemyError as exc:
+        log_event(logger, logging.ERROR, "evaluation_summary_failed", error=str(exc))
+        raise HTTPException(status_code=500, detail=f"Evaluation summary failed: {exc}")
+
+    log_event(
+        logger,
+        logging.INFO,
+        "evaluation_summary_fetched",
+        inventory_city_count=summary["inventory_evaluation"]["total_cities"],
+        rag_document_count=summary["rag_evaluation"].get("document_count"),
+    )
+    return EvaluationSummaryResponse(**summary)
 
 
 @router.get("/predictions", response_model=PredictionHistoryResponse)
