@@ -123,3 +123,13 @@ class PropertySearchQueryRequest(BaseModel):
 
 class PropertySearchQueryResponse(PropertySearchResponse):
     parser_model_name: str
+
+
+class PropertyRecommendationRequest(BaseModel):
+    query: str = Field(..., min_length=4)
+    limit: int = Field(default=5, ge=1, le=20)
+
+
+class PropertyRecommendationResponse(PropertySearchQueryResponse):
+    recommendation_model_name: str
+    answer: str

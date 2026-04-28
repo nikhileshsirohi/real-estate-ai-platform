@@ -90,6 +90,7 @@ def test_root_returns_api_summary() -> None:
     assert response_body["health"] == "/health"
     assert response_body["predictions"] == "/predictions?limit=10"
     assert response_body["search_properties"] == "/search-properties?city=San%20Jose&max_price_usd=900000"
+    assert response_body["recommend_properties"] == "/search-properties/recommend"
 
 
 def test_health_check_returns_ok() -> None:
@@ -291,3 +292,54 @@ def test_search_properties_query_parses_and_returns_items() -> None:
     assert response_body["count"] == 1
     assert response_body["parser_model_name"] == "qwen2.5-coder:7b-instruct"
     assert response_body["items"][0]["city"] == "Oakland"
+
+
+def test_search_properties_recommend_returns_answer() -> None:
+    with (
+        patch("src.api.routes.parse_property_search_query") as mocked_parse,
+        patch("src.api.routes.search_property_listings") as mocked_search,
+        patch("src.api.routes.recommend_property_results") as mocked_recommend,
+    ):
+        mocked_parse.return_value = (
+            PropertySearchFilters(
+                city="San Jose",
+                max_price_usd=900000.0,
+                min_bedrooms=2,
+                limit=3,
+            ),
+            "qwen2.5-coder:7b-instruct",
+        )
+        mocked_search.return_value = [
+            SimpleNamespace(
+                id=12,
+                listing_code="CA-SJ-002",
+                title="North San Jose Apartment",
+                city="San Jose",
+                locality="North San Jose",
+                property_type="apartment",
+                bedrooms=2,
+                bathrooms=2.0,
+                area_sqft=960.0,
+                asking_price_usd=785000.0,
+                description="Two-bedroom apartment-style unit near major employers.",
+                latitude=37.387,
+                longitude=-121.93,
+                created_at=datetime(2026, 4, 28, 12, 15, tzinfo=timezone.utc),
+            )
+        ]
+        mocked_recommend.return_value = (
+            "North San Jose Apartment is the best fit because it stays under budget and matches the requested bedroom count.",
+            "qwen2.5:14b",
+        )
+
+        response = client.post(
+            "/search-properties/recommend",
+            json={"query": "find me a 2 bhk in san jose under 900000", "limit": 3},
+        )
+
+    assert response.status_code == 200
+    response_body = response.json()
+    assert response_body["count"] == 1
+    assert response_body["parser_model_name"] == "qwen2.5-coder:7b-instruct"
+    assert response_body["recommendation_model_name"] == "qwen2.5:14b"
+    assert "best fit" in response_body["answer"].lower()

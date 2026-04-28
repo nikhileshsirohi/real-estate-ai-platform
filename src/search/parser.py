@@ -6,6 +6,7 @@ from typing import Any
 import httpx
 
 from src.api.schemas import PropertySearchFilters
+from src.search.normalization import normalize_property_search_query
 from src.utils.config_loader import load_yaml_config
 
 
@@ -18,6 +19,7 @@ def build_property_search_prompt(query: str, limit: int) -> str:
         "You convert real-estate property search requests into structured JSON filters.\n"
         "Return only valid JSON with no markdown.\n"
         "Use null for unknown values.\n"
+        "All prices are in USD.\n"
         "Allowed keys are exactly:\n"
         "city, locality, property_type, min_price_usd, max_price_usd, "
         "min_bedrooms, max_bedrooms, min_bathrooms, max_bathrooms, "
@@ -54,7 +56,8 @@ def parse_property_search_query(query: str, limit: int) -> tuple[PropertySearchF
     search_config = load_yaml_config(SEARCH_CONFIG_PATH)
     base_url = str(search_config["ollama_base_url"])
     model_name = str(search_config["parser_model_name"])
-    prompt = build_property_search_prompt(query=query, limit=limit)
+    normalized_query = normalize_property_search_query(query)
+    prompt = build_property_search_prompt(query=normalized_query, limit=limit)
 
     response = httpx.post(
         f"{base_url.rstrip('/')}/api/generate",

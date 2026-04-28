@@ -186,6 +186,28 @@ curl -X POST "http://127.0.0.1:8000/search-properties/query" \
 
 The natural-language flow uses Ollama only to parse the request into structured filters. The actual property retrieval still happens through PostgreSQL filters, which keeps the search deterministic and easy to debug.
 
+The parser now also normalizes common real-estate shorthand before sending the query to the LLM, including:
+- `2 BHK` -> `2 bedroom`
+- `sq ft` / `square feet` -> `sqft`
+- `lakh` / `crore` budgets -> approximate USD values using the configurable `inr_per_usd` value in [configs/search_config.yaml](/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/configs/search_config.yaml)
+
+Property recommendation and explanation:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/search-properties/recommend" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Find me a 2 BHK in Oakland under 80 lakh",
+    "limit": 5
+  }'
+```
+
+This route:
+- parses the natural-language query into structured filters
+- fetches matching listings from PostgreSQL
+- asks Ollama to explain the matched rows only
+- returns both the listings and a grounded recommendation summary
+
 ## Observability
 The API now emits structured JSON logs for:
 - application startup
@@ -276,6 +298,7 @@ Keep notebook work separated by purpose:
 - `notebooks/05_ollama_rag_qa.ipynb`: test market Q&A over retrieved context
 - `notebooks/06_property_advisory_rag.ipynb`: combine prediction with conservative market context
 - `notebooks/07_property_search_llm.ipynb`: load listings and test LLM-assisted property search
+- `notebooks/08_property_recommendation.ipynb`: explain and recommend matched property search results
 
 ## RAG Starter
 The project now includes a starter local knowledge corpus built from official California sources so you can begin RAG work without a private dataset.

@@ -12,6 +12,8 @@ from src.api.schemas import (
     PropertyListingItem,
     PropertyAdviceRequest,
     PropertyAdviceResponse,
+    PropertyRecommendationRequest,
+    PropertyRecommendationResponse,
     PredictionDetailResponse,
     PredictionHistoryItem,
     PredictionHistoryResponse,
@@ -32,6 +34,7 @@ from src.db.repository import (
 from src.db.session import get_db
 from src.inference.predictor import load_model_name, predict_price
 from src.rag.service import ask_market_question, ask_property_question
+from src.search.advisor import recommend_property_results
 from src.search.parser import parse_property_search_query
 from src.utils.logger import get_logger, log_event
 
@@ -49,6 +52,7 @@ def root() -> dict[str, str]:
         "health": "/health",
         "predictions": "/predictions?limit=10",
         "search_properties": "/search-properties?city=San%20Jose&max_price_usd=900000",
+        "recommend_properties": "/search-properties/recommend",
     }
 
 
@@ -352,4 +356,45 @@ def search_properties_by_query_route(
         count=len(items),
         applied_filters=filters,
         parser_model_name=parser_model_name,
+    )
+
+
+@router.post("/search-properties/recommend", response_model=PropertyRecommendationResponse)
+def recommend_properties_route(
+    payload: PropertyRecommendationRequest,
+    db: Session = Depends(get_db),
+) -> PropertyRecommendationResponse:
+    """Parse a natural-language request, fetch listings, and explain the best matches."""
+    try:
+        filters, parser_model_name = parse_property_search_query(query=payload.query, limit=payload.limit)
+        records = search_property_listings(db=db, filters=filters)
+        answer, recommendation_model_name = recommend_property_results(
+            query=payload.query,
+            filters=filters,
+            listings=records,
+        )
+    except SQLAlchemyError as exc:
+        log_event(logger, logging.ERROR, "property_recommendation_failed_database", query=payload.query, error=str(exc))
+        raise HTTPException(status_code=500, detail=f"Property recommendation failed: {exc}")
+    except Exception as exc:
+        log_event(logger, logging.ERROR, "property_recommendation_failed_runtime", query=payload.query, error=str(exc))
+        raise HTTPException(status_code=500, detail=f"Property recommendation failed: {exc}")
+
+    items = _to_property_listing_items(records)
+    log_event(
+        logger,
+        logging.INFO,
+        "property_recommendation_completed",
+        query=payload.query,
+        count=len(items),
+        parser_model_name=parser_model_name,
+        recommendation_model_name=recommendation_model_name,
+    )
+    return PropertyRecommendationResponse(
+        items=items,
+        count=len(items),
+        applied_filters=filters,
+        parser_model_name=parser_model_name,
+        recommendation_model_name=recommendation_model_name,
+        answer=answer,
     )
