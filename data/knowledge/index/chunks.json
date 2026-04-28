@@ -46,5 +46,71 @@
     "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/california_population_projections.md",
     "title": "California Population Projections",
     "content": "ng-horizon advisory responses, such as where sustained demand may matter more than a single-year price estimate.\n\n## Advisory Use\n- Use this document when questions ask about future housing pressure, long-term demand, or population-driven planning context.\n- Projection outputs should be treated as planning context, not direct transaction-price evidence.\n\n## Sources\n- https://dof.ca.gov/Forecasting/Demographics/projections/"
+  },
+  {
+    "chunk_id": "doc-3-chunk-8",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/demo_listing_inventory_snapshot.md",
+    "title": "Demo Listing Inventory Snapshot",
+    "content": "# Demo Listing Inventory Snapshot\n\n## Summary\nThis document summarizes the current seeded property-listings inventory used by the local search and recommendation flows. It is a demo inventory snapshot, not an official market dataset.\n\n## Key Facts\n- The current seed inventory includes listings across San Francisco, San Jose, Oakland, San Diego, and Sacramento.\n- Oakland demo listings currently span roughly the low `$600k` range for starter condos to about `$1.49M` for larger family houses.\n- Sacramento remains the lowest-priced city in the current demo inventory, with entry-level apartments an"
+  },
+  {
+    "chunk_id": "doc-3-chunk-9",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/demo_listing_inventory_snapshot.md",
+    "title": "Demo Listing Inventory Snapshot",
+    "content": "family houses.\n- Sacramento remains the lowest-priced city in the current demo inventory, with entry-level apartments and condos below many Bay Area alternatives.\n- San Francisco and San Jose listings skew higher overall, especially for family-sized units with 3 or more bedrooms.\n- Condos and apartments in the seeded inventory usually represent lower entry-price options than detached houses in the same city.\n\n## City Notes\n### Oakland\n- Demo Oakland inventory includes urban condos, townhouses, and larger houses.\n- Listings mentioning BART or stronger commute access should be preferred for tran"
+  },
+  {
+    "chunk_id": "doc-3-chunk-10",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/demo_listing_inventory_snapshot.md",
+    "title": "Demo Listing Inventory Snapshot",
+    "content": "ondos, townhouses, and larger houses.\n- Listings mentioning BART or stronger commute access should be preferred for transit-oriented searches.\n- Starter-level Oakland options exist in the condo segment, while larger family-oriented houses sit much higher in price.\n\n### San Jose\n- Demo San Jose inventory mixes employer-adjacent apartments with more spacious family houses.\n- North San Jose and Downtown listings are better suited for entry or commuter-oriented searches than Almaden or Evergreen family houses.\n\n### San Francisco\n- Demo San Francisco inventory remains expensive even for smaller con"
+  },
+  {
+    "chunk_id": "doc-3-chunk-11",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/demo_listing_inventory_snapshot.md",
+    "title": "Demo Listing Inventory Snapshot",
+    "content": "den or Evergreen family houses.\n\n### San Francisco\n- Demo San Francisco inventory remains expensive even for smaller condos.\n- Transit- and walkability-oriented searches are more likely to surface apartment or condo products than detached houses.\n\n### San Diego\n- Demo San Diego inventory shows a split between coastal premium pricing and more moderate urban or inland options.\n- Family-oriented house searches tend to surface Clairemont or North Park style listings before coastal luxury products.\n\n### Sacramento\n- Demo Sacramento inventory offers the strongest affordability within the current see"
+  },
+  {
+    "chunk_id": "doc-3-chunk-12",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/demo_listing_inventory_snapshot.md",
+    "title": "Demo Listing Inventory Snapshot",
+    "content": "l luxury products.\n\n### Sacramento\n- Demo Sacramento inventory offers the strongest affordability within the current seed set.\n- Buyers with tighter budgets are more likely to find matching options in Midtown, Downtown, Natomas, Curtis Park, or East Sacramento than in Bay Area cities.\n\n## Advisory Use\n- Use this document when a query needs a city-level explanation of why some search results are more or less affordable in the demo inventory.\n- Do not present this document as official market evidence. It is internal demo context derived from the seeded listing set."
+  },
+  {
+    "chunk_id": "doc-4-chunk-13",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/demo_locality_preference_notes.md",
+    "title": "Demo Locality Preference Notes",
+    "content": "# Demo Locality Preference Notes\n\n## Summary\nThis document provides demo locality-level notes based on the seeded listing inventory. These notes are intended to help the recommendation and advisory layers explain search tradeoffs more specifically than statewide California context.\n\n## Locality Highlights\n### Oakland\n- **Lake Merritt**: better fit for buyers who want a balanced city lifestyle with commute access and urban amenities.\n- **Temescal**: stronger fit for buyers who want a neighborhood retail feel and townhouse-style living.\n- **Rockridge**: better fit for higher-budget family or own"
+  },
+  {
+    "chunk_id": "doc-4-chunk-14",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/demo_locality_preference_notes.md",
+    "title": "Demo Locality Preference Notes",
+    "content": "want a neighborhood retail feel and townhouse-style living.\n- **Rockridge**: better fit for higher-budget family or owner-occupier searches, especially when BART access matters.\n- **Uptown**: better for lower-entry city buyers than large-family buyers.\n- **Jack London Square**: better for transit-connected urban buyers than for family-size space seekers.\n- **Montclair**: better for larger-home and family-oriented searches than for budget-constrained buyers.\n\n### San Jose\n- **North San Jose**: better for commuter-oriented or employer-adjacent searches.\n- **Downtown San Jose**: stronger for urb"
+  },
+  {
+    "chunk_id": "doc-4-chunk-15",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/demo_locality_preference_notes.md",
+    "title": "Demo Locality Preference Notes",
+    "content": "*North San Jose**: better for commuter-oriented or employer-adjacent searches.\n- **Downtown San Jose**: stronger for urban, entry-level, or transit-friendly searches.\n- **Willow Glen**: balanced owner-occupier location for townhouse buyers.\n- **Almaden Valley** and **Evergreen**: stronger fit for larger-family space than for budget or starter searches.\n\n### San Francisco\n- **SoMa** and **Mission District**: stronger fit for urban, commute, or investment-oriented searches.\n- **Sunset District**, **Inner Sunset**, and **Noe Valley**: better fit for buyers who prioritize neighborhood livability o"
+  },
+  {
+    "chunk_id": "doc-4-chunk-16",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/demo_locality_preference_notes.md",
+    "title": "Demo Locality Preference Notes",
+    "content": "*Sunset District**, **Inner Sunset**, and **Noe Valley**: better fit for buyers who prioritize neighborhood livability over lowest entry price.\n- **Richmond District**: more suitable for starter condo positioning than premium family-house searches.\n\n### San Diego\n- **Mission Valley** and **Hillcrest**: stronger fit for transit, central access, or smaller-unit searches.\n- **North Park** and **Clairemont**: more balanced for owner-occupier and family-style searches.\n- **La Jolla**: premium lifestyle positioning with less budget flexibility.\n- **Little Italy**: better fit for urban/investment-sty"
+  },
+  {
+    "chunk_id": "doc-4-chunk-17",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/demo_locality_preference_notes.md",
+    "title": "Demo Locality Preference Notes",
+    "content": "a**: premium lifestyle positioning with less budget flexibility.\n- **Little Italy**: better fit for urban/investment-style searches than larger-family needs.\n\n### Sacramento\n- **Midtown** and **Downtown**: stronger for lower-entry urban searches.\n- **Natomas**: practical value-oriented townhouse option.\n- **East Sacramento**, **Land Park**, and **Curtis Park**: stronger fit for owner-occupier and family-style searches.\n\n## Advisory Use\n- Use this document when explaining why one returned listing may fit a lifestyle or search intent better than another.\n- These are demo preference notes derived"
+  },
+  {
+    "chunk_id": "doc-4-chunk-18",
+    "source_path": "/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/data/knowledge/raw/demo_locality_preference_notes.md",
+    "title": "Demo Locality Preference Notes",
+    "content": "one returned listing may fit a lifestyle or search intent better than another.\n- These are demo preference notes derived from the seed inventory and listing descriptions, not external market research."
   }
 ]

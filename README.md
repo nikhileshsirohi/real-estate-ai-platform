@@ -160,6 +160,12 @@ The project now includes a seed property-listings dataset so you can test struct
 Seed dataset:
 - `data/sample/property_listings_seed.csv`
 
+The seed inventory now covers a broader mix of:
+- entry-level apartments and condos
+- family-oriented houses
+- townhouses
+- multiple localities across San Francisco, San Jose, Oakland, San Diego, and Sacramento
+
 Load sample listings into PostgreSQL:
 
 ```bash
@@ -304,6 +310,7 @@ Keep notebook work separated by purpose:
 - `notebooks/06_property_advisory_rag.ipynb`: combine prediction with conservative market context
 - `notebooks/07_property_search_llm.ipynb`: load listings and test LLM-assisted property search
 - `notebooks/08_property_recommendation.ipynb`: explain and recommend matched property search results
+- `notebooks/09_local_inventory_and_area_rag.ipynb`: reload expanded listings and rebuild/test local area RAG
 
 ## RAG Starter
 The project now includes a starter local knowledge corpus built from official California sources so you can begin RAG work without a private dataset.
@@ -316,11 +323,19 @@ Initial official sources used:
 - California Department of Finance population and housing estimates
 - California Department of Finance population projections
 
+Additional local demo context now included:
+- `demo_listing_inventory_snapshot.md`
+- `demo_locality_preference_notes.md`
+
+These local demo docs are derived from the seeded listing inventory and are meant for prototype retrieval quality, not official market research.
+
 Build the local vector index:
 
 ```bash
 python -m src.rag.build_index
 ```
+
+After adding or editing local knowledge docs, rebuild the index before testing advisory flows again.
 
 Run a simple retrieval test:
 

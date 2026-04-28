@@ -116,6 +116,7 @@ class PropertySearchResponse(BaseModel):
     applied_filters: PropertySearchFilters
     match_strategy: str = "exact"
     advisory_note: str | None = None
+    detected_preferences: list[str] = []
 
 
 class PropertySearchQueryRequest(BaseModel):

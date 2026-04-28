@@ -2,15 +2,30 @@ listing_code,title,city,locality,property_type,bedrooms,bathrooms,area_sqft,aski
 CA-SF-001,Sunset Family House,San Francisco,Sunset District,house,3,2.0,1580,1295000,Three-bedroom family house with updated kitchen and backyard access near transit.,37.753,-122.494
 CA-SF-002,SoMa Loft Condo,San Francisco,SoMa,condo,2,2.0,1180,989000,Modern condo loft with open plan living and walkable downtown access.,37.778,-122.405
 CA-SF-003,Richmond Starter Condo,San Francisco,Richmond District,condo,1,1.0,720,699000,Compact starter condo suited for first-time buyers looking for west-side access.,37.780,-122.482
+CA-SF-004,Noe Valley Family Condo,San Francisco,Noe Valley,condo,3,2.0,1360,1395000,Family-oriented condo with practical layout and neighborhood retail nearby.,37.751,-122.433
+CA-SF-005,Mission Investment Duplex-Style Condo,San Francisco,Mission District,condo,2,2.0,1010,945000,Well-located condo with strong rental appeal and easy transit access.,37.759,-122.419
+CA-SF-006,Inner Sunset Transit Condo,San Francisco,Inner Sunset,apartment,2,1.0,840,825000,Mid-sized apartment with Muni access and balanced price-to-location tradeoff.,37.763,-122.466
 CA-SJ-001,Willow Glen Townhouse,San Jose,Willow Glen,townhouse,3,2.5,1490,1095000,Well-kept townhouse with garage parking and flexible work-from-home layout.,37.301,-121.900
 CA-SJ-002,North San Jose Apartment,San Jose,North San Jose,apartment,2,2.0,960,785000,Two-bedroom apartment-style unit near major employers and freeway connections.,37.387,-121.930
 CA-SJ-003,Almaden Valley House,San Jose,Almaden Valley,house,4,3.0,2140,1495000,Spacious house with larger lot and strong family-home appeal.,37.217,-121.860
+CA-SJ-004,Downtown San Jose Condo,San Jose,Downtown San Jose,condo,1,1.0,690,615000,Entry-level downtown condo with light-rail access and urban walkability.,37.335,-121.886
+CA-SJ-005,Campbell Border Townhouse,San Jose,West San Jose,townhouse,3,2.5,1540,1185000,Three-bedroom townhouse with commuter-friendly location and updated interiors.,37.312,-121.952
+CA-SJ-006,Evergreen Family House,San Jose,Evergreen,house,4,2.5,1980,1365000,Larger house designed for family buyers seeking more bedrooms and quieter streets.,37.293,-121.790
 CA-OAK-001,Lake Merritt Condo,Oakland,Lake Merritt,condo,2,2.0,1040,725000,Condo close to Lake Merritt with balanced commute access and urban amenities.,37.809,-122.257
 CA-OAK-002,Rockridge House,Oakland,Rockridge,house,3,2.0,1710,1325000,Charming house near shopping and BART with strong owner-occupier appeal.,37.845,-122.252
 CA-OAK-003,Temescal Townhouse,Oakland,Temescal,townhouse,2,2.5,1280,865000,Two-level townhouse with newer finishes and neighborhood retail access.,37.838,-122.262
+CA-OAK-004,Jack London Loft,Oakland,Jack London Square,apartment,1,1.0,760,565000,Urban loft-style apartment with ferry and train connectivity for commuters.,37.795,-122.279
+CA-OAK-005,Montclair Family House,Oakland,Montclair,house,4,3.0,2260,1490000,Hillside family house with larger footprint and quieter residential character.,37.826,-122.209
+CA-OAK-006,Uptown Starter Condo,Oakland,Uptown,condo,2,1.0,820,612000,Starter condo with nightlife access and a lower entry price for city buyers.,37.807,-122.270
 CA-SD-001,La Jolla Coastal Condo,San Diego,La Jolla,condo,2,2.0,1125,1210000,Premium coastal condo with strong lifestyle positioning and nearby amenities.,32.832,-117.271
 CA-SD-002,North Park Starter House,San Diego,North Park,house,2,1.0,980,895000,Starter house in a popular neighborhood with renovation upside.,32.744,-117.130
 CA-SD-003,Mission Valley Apartment,San Diego,Mission Valley,apartment,1,1.0,690,545000,Entry-level apartment near retail hubs and major transport links.,32.777,-117.149
+CA-SD-004,Hillcrest Transit Condo,San Diego,Hillcrest,condo,2,2.0,970,812000,Condo with strong central access suited to buyers prioritizing commute and amenities.,32.748,-117.163
+CA-SD-005,Clairemont Family House,San Diego,Clairemont,house,3,2.0,1460,948000,Family-oriented house with practical layout and more value than the coastal core.,32.833,-117.189
+CA-SD-006,Little Italy Investment Loft,San Diego,Little Italy,apartment,1,1.0,710,668000,Urban apartment with investor-friendly positioning and strong amenity access.,32.723,-117.168
 CA-SAC-001,East Sacramento House,Sacramento,East Sacramento,house,3,2.0,1650,699000,Classic family house in a stable residential pocket with good local access.,38.566,-121.450
 CA-SAC-002,Midtown Condo,Sacramento,Midtown,condo,1,1.0,760,419000,Urban condo for buyers seeking central access and lower price entry.,38.573,-121.482
 CA-SAC-003,Natomas Townhouse,Sacramento,Natomas,townhouse,3,2.5,1420,498000,Affordable townhouse option with practical layout and suburban access.,38.646,-121.507
+CA-SAC-004,Land Park Family House,Sacramento,Land Park,house,4,2.5,1880,765000,Family house with larger layout and established neighborhood appeal.,38.556,-121.493
+CA-SAC-005,Curtis Park Bungalow,Sacramento,Curtis Park,house,2,1.0,1080,575000,Smaller house with character and good access for owner-occupiers wanting central neighborhoods.,38.555,-121.469
+CA-SAC-006,Downtown Sacramento Apartment,Sacramento,Downtown,apartment,1,1.0,640,365000,Entry-level apartment for budget-conscious buyers wanting urban proximity.,38.581,-121.494

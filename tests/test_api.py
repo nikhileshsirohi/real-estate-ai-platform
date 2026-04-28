@@ -297,6 +297,7 @@ def test_search_properties_query_parses_and_returns_items() -> None:
     assert response_body["parser_model_name"] == "qwen2.5-coder:7b-instruct"
     assert response_body["items"][0]["city"] == "Oakland"
     assert response_body["match_strategy"] == "exact"
+    assert response_body["detected_preferences"] == []
 
 
 def test_search_properties_recommend_returns_answer() -> None:
@@ -353,6 +354,7 @@ def test_search_properties_recommend_returns_answer() -> None:
     assert response_body["recommendation_model_name"] == "qwen2.5-coder:7b-instruct"
     assert "best fit" in response_body["answer"].lower()
     assert response_body["match_strategy"] == "exact"
+    assert response_body["detected_preferences"] == []
 
 
 def test_search_properties_recommend_handles_no_results() -> None:
@@ -391,6 +393,7 @@ def test_search_properties_recommend_handles_no_results() -> None:
     assert response_body["count"] == 0
     assert "no property listings matched" in response_body["answer"].lower()
     assert response_body["match_strategy"] == "exact"
+    assert response_body["detected_preferences"] == []
 
 
 def test_search_properties_query_returns_closest_matches_when_budget_too_low() -> None:
@@ -440,3 +443,4 @@ def test_search_properties_query_returns_closest_matches_when_budget_too_low() -
     assert response_body["count"] == 1
     assert response_body["match_strategy"] == "closest_match"
     assert "closest matches" in response_body["advisory_note"].lower()
+    assert response_body["detected_preferences"] == []

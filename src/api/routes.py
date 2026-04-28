@@ -37,6 +37,7 @@ from src.inference.predictor import load_model_name, predict_price
 from src.rag.service import ask_market_question, ask_property_question
 from src.search.advisor import recommend_property_results
 from src.search.parser import parse_property_search_query
+from src.search.preferences import detect_search_preferences, rerank_property_listings
 from src.utils.logger import get_logger, log_event
 
 
@@ -334,8 +335,10 @@ def search_properties_by_query_route(
 ) -> PropertySearchQueryResponse:
     """Parse a natural-language property search request, then query PostgreSQL."""
     try:
+        preferences = detect_search_preferences(payload.query)
         filters, parser_model_name = parse_property_search_query(query=payload.query, limit=payload.limit)
         records, match_strategy, advisory_note = search_property_listings_with_fallback(db=db, filters=filters)
+        records = rerank_property_listings(records, preferences=preferences)
     except SQLAlchemyError as exc:
         log_event(logger, logging.ERROR, "property_search_query_failed_database", query=payload.query, error=str(exc))
         raise HTTPException(status_code=500, detail=f"Property search failed: {exc}")
@@ -352,6 +355,7 @@ def search_properties_by_query_route(
         count=len(items),
         parser_model_name=parser_model_name,
         match_strategy=match_strategy,
+        detected_preferences=preferences,
     )
     return PropertySearchQueryResponse(
         items=items,
@@ -360,6 +364,7 @@ def search_properties_by_query_route(
         parser_model_name=parser_model_name,
         match_strategy=match_strategy,
         advisory_note=advisory_note,
+        detected_preferences=preferences,
     )
 
 
@@ -370,12 +375,15 @@ def recommend_properties_route(
 ) -> PropertyRecommendationResponse:
     """Parse a natural-language request, fetch listings, and explain the best matches."""
     try:
+        preferences = detect_search_preferences(payload.query)
         filters, parser_model_name = parse_property_search_query(query=payload.query, limit=payload.limit)
         records, match_strategy, advisory_note = search_property_listings_with_fallback(db=db, filters=filters)
+        records = rerank_property_listings(records, preferences=preferences)
         answer, recommendation_model_name = recommend_property_results(
             query=payload.query,
             filters=filters,
             listings=records,
+            preferences=preferences,
             match_strategy=match_strategy,
             advisory_note=advisory_note,
         )
@@ -396,6 +404,7 @@ def recommend_properties_route(
         parser_model_name=parser_model_name,
         recommendation_model_name=recommendation_model_name,
         match_strategy=match_strategy,
+        detected_preferences=preferences,
     )
     return PropertyRecommendationResponse(
         items=items,
@@ -406,4 +415,5 @@ def recommend_properties_route(
         answer=answer,
         match_strategy=match_strategy,
         advisory_note=advisory_note,
+        detected_preferences=preferences,
     )

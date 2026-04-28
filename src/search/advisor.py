@@ -16,6 +16,7 @@ def build_property_recommendation_prompt(
     query: str,
     filters: PropertySearchFilters,
     listings: Sequence[PropertyListing],
+    preferences: Sequence[str] | None = None,
     match_strategy: str = "exact",
     advisory_note: str | None = None,
 ) -> str:
@@ -42,6 +43,7 @@ def build_property_recommendation_prompt(
         "Be practical and concise.\n\n"
         f"User search query:\n{query}\n\n"
         f"Applied filters:\n{filters.model_dump_json(indent=2)}\n\n"
+        f"Detected preferences: {', '.join(preferences or []) or 'None'}\n"
         f"Match strategy: {match_strategy}\n"
         f"Advisory note: {advisory_note or 'None'}\n\n"
         f"Matched listings:\n{chr(10).join(listing_lines)}\n\n"
@@ -87,6 +89,7 @@ def recommend_property_results(
     query: str,
     filters: PropertySearchFilters,
     listings: Sequence[PropertyListing],
+    preferences: Sequence[str] | None = None,
     match_strategy: str = "exact",
     advisory_note: str | None = None,
 ) -> tuple[str, str]:
@@ -102,6 +105,7 @@ def recommend_property_results(
         query=query,
         filters=filters,
         listings=listings,
+        preferences=preferences,
         match_strategy=match_strategy,
         advisory_note=advisory_note,
     )
