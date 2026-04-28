@@ -303,3 +303,28 @@ curl -X POST "http://127.0.0.1:8000/ask-market" \
 Notebook flow:
 - `notebooks/04_rag_corpus_and_retrieval.ipynb`
 - `notebooks/05_ollama_rag_qa.ipynb`
+- `notebooks/06_property_advisory_rag.ipynb`
+
+## Property Advisory RAG
+The project now supports a property-level advisory flow that combines:
+- tuned XGBoost price prediction
+- retrieved official housing context
+- Ollama-generated explanation
+
+API endpoint:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/advise-property" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "How should I interpret this predicted price in market context?",
+    "median_income": 8.3252,
+    "house_age": 41.0,
+    "average_rooms": 6.984127,
+    "average_bedrooms": 1.02381,
+    "population": 322.0,
+    "average_occupancy": 2.555556,
+    "latitude": 37.88,
+    "longitude": -122.23
+  }'
+```

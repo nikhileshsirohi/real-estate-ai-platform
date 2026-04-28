@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 from src.api.schemas import (
     MarketAdviceResponse,
     MarketQuestionRequest,
+    PropertyAdviceRequest,
+    PropertyAdviceResponse,
     PredictionDetailResponse,
     PredictionHistoryItem,
     PredictionHistoryResponse,
@@ -23,7 +25,7 @@ from src.db.repository import (
 )
 from src.db.session import get_db
 from src.inference.predictor import load_model_name, predict_price
-from src.rag.service import ask_market_question
+from src.rag.service import ask_market_question, ask_property_question
 from src.utils.logger import get_logger, log_event
 
 
@@ -202,3 +204,42 @@ def ask_market_route(payload: MarketQuestionRequest) -> MarketAdviceResponse:
         source_count=len(result["sources"]),
     )
     return MarketAdviceResponse(**result)
+
+
+@router.post("/advise-property", response_model=PropertyAdviceResponse)
+def advise_property_route(payload: PropertyAdviceRequest) -> PropertyAdviceResponse:
+    """Generate property-level advisory output using prediction plus RAG."""
+    property_features = {
+        "median_income": payload.median_income,
+        "house_age": payload.house_age,
+        "average_rooms": payload.average_rooms,
+        "average_bedrooms": payload.average_bedrooms,
+        "population": payload.population,
+        "average_occupancy": payload.average_occupancy,
+        "latitude": payload.latitude,
+        "longitude": payload.longitude,
+    }
+    log_event(logger, logging.INFO, "property_advice_started", question=payload.question)
+    try:
+        result = ask_property_question(payload.question, property_features)
+    except Exception as exc:
+        log_event(
+            logger,
+            logging.ERROR,
+            "property_advice_failed",
+            question=payload.question,
+            error=str(exc),
+            error_type=type(exc).__name__,
+        )
+        raise HTTPException(status_code=500, detail=f"Property advice failed: {exc}")
+
+    log_event(
+        logger,
+        logging.INFO,
+        "property_advice_created",
+        question=payload.question,
+        model_name=result["model_name"],
+        predicted_price=result["predicted_price"],
+        source_count=len(result["sources"]),
+    )
+    return PropertyAdviceResponse(**result)

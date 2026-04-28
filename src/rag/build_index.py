@@ -8,7 +8,7 @@ import numpy as np
 
 from src.rag.chunking import chunk_documents
 from src.rag.document_loader import load_markdown_documents
-from src.rag.embeddings import embed_texts, load_embedding_model
+from src.rag.embeddings import embed_texts
 from src.utils.config_loader import load_yaml_config, resolve_project_path
 
 
@@ -21,6 +21,12 @@ def save_chunks_metadata(chunks_path: Path, metadata: list[dict[str, str]]) -> N
     chunks_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
 
+def save_index_metadata(index_metadata_path: Path, metadata: dict[str, object]) -> None:
+    """Persist retrieval index metadata for later compatibility checks."""
+    index_metadata_path.parent.mkdir(parents=True, exist_ok=True)
+    index_metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+
+
 def main() -> None:
     """Build and save the local FAISS knowledge index."""
     rag_config = load_yaml_config(RAG_CONFIG_PATH)
@@ -28,13 +34,19 @@ def main() -> None:
     index_output_dir = resolve_project_path(str(rag_config["index_output_dir"]))
     chunk_size = int(rag_config["chunk_size"])
     chunk_overlap = int(rag_config["chunk_overlap"])
+    embedding_provider = str(rag_config["embedding_provider"])
     model_name = str(rag_config["embedding_model_name"])
+    ollama_base_url = str(rag_config["ollama_base_url"])
 
     documents = load_markdown_documents(raw_dir)
     chunks = chunk_documents(documents, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
 
-    model = load_embedding_model(model_name)
-    vectors = embed_texts(model, [chunk.content for chunk in chunks])
+    vectors = embed_texts(
+        texts=[chunk.content for chunk in chunks],
+        embedding_provider=embedding_provider,
+        model_name=model_name,
+        ollama_base_url=ollama_base_url,
+    )
     matrix = np.array(vectors, dtype="float32")
 
     index = faiss.IndexFlatIP(matrix.shape[1])
@@ -54,9 +66,20 @@ def main() -> None:
             for chunk in chunks
         ],
     )
+    save_index_metadata(
+        index_output_dir / "index_metadata.json",
+        {
+            "embedding_provider": embedding_provider,
+            "embedding_model_name": model_name,
+            "vector_dimension": int(matrix.shape[1]),
+            "document_count": len(documents),
+            "chunk_count": len(chunks),
+        },
+    )
 
     print(f"Saved FAISS index to {index_output_dir / 'knowledge.index'}")
     print(f"Saved chunk metadata to {index_output_dir / 'chunks.json'}")
+    print(f"Saved index metadata to {index_output_dir / 'index_metadata.json'}")
     print(f"Documents loaded: {len(documents)}")
     print(f"Chunks created: {len(chunks)}")
 

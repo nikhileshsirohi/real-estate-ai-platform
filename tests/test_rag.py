@@ -5,6 +5,7 @@ from pathlib import Path
 from src.rag.chunking import chunk_documents
 from src.rag.document_loader import load_markdown_documents
 from src.rag.generator import build_market_prompt
+from src.rag.service import build_property_summary
 from src.rag.schemas import KnowledgeDocument
 
 
@@ -43,3 +44,21 @@ def test_build_market_prompt_contains_question_and_context() -> None:
 
     assert "What supports California affordability pressure?" in prompt
     assert "Median value of owner-occupied housing units was $734,700." in prompt
+
+
+def test_build_property_summary_includes_expected_fields() -> None:
+    summary = build_property_summary(
+        {
+            "median_income": 8.3252,
+            "house_age": 41.0,
+            "average_rooms": 6.984127,
+            "average_bedrooms": 1.02381,
+            "population": 322.0,
+            "average_occupancy": 2.555556,
+            "latitude": 37.88,
+            "longitude": -122.23,
+        }
+    )
+
+    assert "median_income: 8.3252" in summary
+    assert "longitude: -122.23" in summary

@@ -171,3 +171,43 @@ def test_ask_market_returns_advice() -> None:
     response_body = response.json()
     assert response_body["model_name"] == "qwen2.5:14b"
     assert len(response_body["sources"]) == 1
+
+
+def test_advise_property_returns_property_advice() -> None:
+    with patch("src.api.routes.ask_property_question") as mocked_ask_property:
+        mocked_ask_property.return_value = {
+            "answer": "The model suggests the property is expensive but still consistent with high-income local conditions.",
+            "model_name": "qwen2.5:14b",
+            "predicted_price": 3.95,
+            "predicted_price_usd": 395000.0,
+            "sources": [
+                {
+                    "chunk_id": "doc-0-chunk-0",
+                    "source_path": "data/knowledge/raw/california_housing_snapshot.md",
+                    "title": "California Housing Snapshot",
+                    "content": "Median value of owner-occupied housing units was $734,700.",
+                    "score": 0.92,
+                }
+            ],
+        }
+
+        response = client.post(
+            "/advise-property",
+            json={
+                "question": "How should I interpret this predicted price?",
+                "median_income": 8.3252,
+                "house_age": 41.0,
+                "average_rooms": 6.984127,
+                "average_bedrooms": 1.02381,
+                "population": 322.0,
+                "average_occupancy": 2.555556,
+                "latitude": 37.88,
+                "longitude": -122.23,
+            },
+        )
+
+    assert response.status_code == 200
+    response_body = response.json()
+    assert response_body["model_name"] == "qwen2.5:14b"
+    assert response_body["predicted_price"] == 3.95
+    assert response_body["predicted_price_usd"] == 395000.0

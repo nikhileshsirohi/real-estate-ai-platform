@@ -1,0 +1,7 @@
+{
+  "embedding_provider": "ollama",
+  "embedding_model_name": "nomic-embed-text:latest",
+  "vector_dimension": 768,
+  "document_count": 3,
+  "chunk_count": 8
+}

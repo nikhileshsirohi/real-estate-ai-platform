@@ -62,3 +62,15 @@ class MarketAdviceResponse(BaseModel):
     answer: str
     model_name: str
     sources: list[MarketAdviceSource]
+
+
+class PropertyAdviceRequest(PricePredictionRequest):
+    question: str = Field(..., min_length=5)
+
+
+class PropertyAdviceResponse(BaseModel):
+    answer: str
+    model_name: str
+    predicted_price: float
+    predicted_price_usd: float
+    sources: list[MarketAdviceSource]
