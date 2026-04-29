@@ -1,105 +1,165 @@
 # AI-Powered Real Estate Price Intelligence & Advisory Platform
 
-## Overview
-Production-style AI/ML project for real estate price prediction and advisory.
+Production-style AI/ML + RAG project for real estate price prediction, property search, and market/property advisory.
 
-## Current Scope
-- Data ingestion from a real housing dataset
-- Data cleaning
-- feature engineering with log/capped transforms
-- tuned XGBoost model training
-- MLflow experiment tracking
-- Local model artifact saving
-- FastAPI prediction endpoint
+## What This Project Does
+- Predicts property prices with a tuned XGBoost model
+- Stores prediction history in PostgreSQL
+- Answers market questions using RAG + Ollama
+- Explains property prices using prediction + retrieved context
+- Searches seeded property listings with structured filters or natural language
+- Recommends closest matches when exact search results are unavailable
+- Shows monitoring and evaluation snapshots in a simple frontend
 
 ## Tech Stack
-- Python
+- Python 3.10+
 - FastAPI
-- Pandas
-- NumPy
-- Scikit-learn
+- PostgreSQL
+- SQLAlchemy
+- Alembic
+- Pandas / NumPy / Scikit-learn / XGBoost
 - MLflow
-- PostgreSQL later
+- Ollama
+- FAISS
+- HTML / CSS / JavaScript frontend
+- Docker
+
+## Current Best Model
+- Model: tuned XGBoost regressor
+- RMSE: `0.4370`
+- MAE: `0.2847`
+- R²: `0.8543`
+
+Model artifacts:
+- `models/xgboost_price_model_tuned_clean.joblib`
+- `models/xgboost_price_model_features.json`
+- `models/xgboost_price_model_metrics.json`
+
+## Project Structure
+```text
+real-estate-ai-platform/
+├── frontend/
+├── configs/
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   ├── sample/
+│   └── knowledge/
+├── models/
+├── notebooks/
+├── src/
+│   ├── api/
+│   ├── data/
+│   ├── db/
+│   ├── features/
+│   ├── inference/
+│   ├── monitoring/
+│   ├── rag/
+│   ├── search/
+│   ├── training/
+│   └── utils/
+├── tests/
+├── Dockerfile
+├── docker-compose.yml
+└── README.md
+```
 
 ## Setup
+From the project root:
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## PostgreSQL 14 Local Setup
-If you are using Homebrew PostgreSQL 14 on macOS:
+## PostgreSQL Local Setup
+For Homebrew PostgreSQL 14 on macOS:
 
 ```bash
 brew services start postgresql@14
 createdb real_estate_db
 ```
 
-Create a local `.env` file from [.env.example](/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/.env.example) and set your macOS username in `DATABASE_URL`.
+Create a local `.env` file from [.env.example]
 
 Example:
 
 ```env
-DATABASE_URL=postgresql+psycopg2://YOUR_MAC_USERNAME@localhost:5432/real_estate_db
+APP_ENV=development
+LOG_LEVEL=INFO
+MLFLOW_TRACKING_URI=http://127.0.0.1:5000
+DATABASE_URL=postgresql+psycopg2://YOUR_USERNAME_PASSWORD@localhost:5432/real_estate_db
+AUTO_CREATE_TABLES=true
 ```
 
 ## Data Pipeline
+Run the end-to-end tabular pipeline:
+
 ```bash
 python -m src.data.ingestion
 python -m src.data.cleaning
 python -m src.features.feature_engineering
+python -m src.training.train_model
 ```
 
-Current feature engineering adds:
+Feature engineering currently includes:
 - `bedroom_ratio`
 - `rooms_per_person`
-- log-transformed versions of skewed columns
-- capped versions of skewed columns using the 99th percentile from the training dataset
-- saved feature-engineering metadata for consistent inference
+- log-transformed skewed features
+- capped feature variants
+- saved feature metadata for consistent inference
 
-## Training
-Choose the model in [configs/model_config.yaml](/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/configs/model_config.yaml).
+## MLflow
+Start MLflow UI:
 
-Supported values:
-- `linear_regression`
-- `random_forest`
-- `xgboost`
-
-Current best tuned XGBoost params:
-
-```json
-{
-  "subsample": 1.0,
-  "reg_lambda": 3,
-  "reg_alpha": 1,
-  "n_estimators": 900,
-  "min_child_weight": 7,
-  "max_depth": 5,
-  "learning_rate": 0.07,
-  "colsample_bytree": 0.7
-}
+```bash
+mlflow ui
 ```
 
-Run training:
+Then train the model:
 
 ```bash
 python -m src.training.train_model
 ```
 
-Saved artifacts:
-- `models/xgboost_price_model_tuned_clean.joblib`
-- `models/xgboost_price_model_features.json`
-- `models/xgboost_price_model_metrics.json`
+## Database Migrations
+Create or upgrade schema:
 
-## API
-Start the API:
+```bash
+alembic upgrade head
+```
+
+## Load Seed Property Listings
+The project includes demo property inventory for local search and recommendation.
+
+```bash
+python -m src.data.load_property_listings
+```
+
+The seeded inventory covers multiple cities, including:
+- Oakland
+- San Francisco
+- San Jose
+- Sacramento
+- San Diego
+
+## Build the RAG Index
+```bash
+python -m src.rag.build_index
+```
+
+This builds:
+- `data/knowledge/index/knowledge.index`
+- `data/knowledge/index/chunks.json`
+- `data/knowledge/index/index_metadata.json`
+
+## Run the API
+Always run from the project root:
 
 ```bash
 uvicorn src.api.main:app --reload
 ```
-
-Make sure PostgreSQL is running and `DATABASE_URL` is set in your environment or `.env`.
 
 Health check:
 
@@ -107,34 +167,31 @@ Health check:
 curl http://127.0.0.1:8000/health
 ```
 
-Root API summary:
+Root summary:
 
 ```bash
 curl http://127.0.0.1:8000/
 ```
 
-Interactive frontend:
+## Frontend
+Open the interactive app:
 
 ```bash
 open http://127.0.0.1:8000/app
 ```
 
-The frontend lets you interact with:
-- price prediction
-- market Q&A
-- property advisory
-- property search
-- property recommendation
-- monitoring/evaluation snapshots
+The frontend supports:
+- Predict Price
+- Ask Market
+- Advise Property
+- Search Inventory
+- Recommend Listings
+- Monitoring Snapshot
+- Evaluation Snapshot
 
-Prediction history:
+## API Endpoints
 
-```bash
-curl "http://127.0.0.1:8000/predictions?limit=10"
-```
-
-Prediction request:
-
+### Prediction
 ```bash
 curl -X POST "http://127.0.0.1:8000/predict-price" \
   -H "Content-Type: application/json" \
@@ -150,51 +207,45 @@ curl -X POST "http://127.0.0.1:8000/predict-price" \
   }'
 ```
 
-Successful responses now include a saved `prediction_id` from PostgreSQL.
-
-## Prediction Logging
-Each `/predict-price` request is stored in PostgreSQL with:
-- input property features
-- predicted price
-- model name
-- creation timestamp
-
-Table name:
-- `prediction_records`
-
-History endpoint:
-- `GET /predictions?limit=10`
-- `GET /predictions/{id}`
-- `GET /predictions?limit=10&model_name=xgboost`
-- `GET /predictions?limit=10&min_predicted_price=3.0&max_predicted_price=5.0`
-
-## Property Search
-The project now includes a seed property-listings dataset so you can test structured and natural-language property search locally without a private MLS feed.
-
-Seed dataset:
-- `data/sample/property_listings_seed.csv`
-
-The seed inventory now covers a broader mix of:
-- entry-level apartments and condos
-- family-oriented houses
-- townhouses
-- multiple localities across San Francisco, San Jose, Oakland, San Diego, and Sacramento
-
-Load sample listings into PostgreSQL:
+Prediction history:
 
 ```bash
-alembic upgrade head
-python -m src.data.load_property_listings
+curl "http://127.0.0.1:8000/predictions?limit=10"
+curl "http://127.0.0.1:8000/predictions/1"
 ```
 
-Structured property search:
-
+### Ask Market
 ```bash
-curl "http://127.0.0.1:8000/search-properties?city=San%20Jose&max_price_usd=900000&limit=5"
+curl -X POST "http://127.0.0.1:8000/ask-market" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "Which demo city looks more affordable for a lower-entry buyer, Sacramento or San Francisco?"
+  }'
 ```
 
-Natural-language property search:
+### Advise Property
+```bash
+curl -X POST "http://127.0.0.1:8000/advise-property" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "How should I interpret this predicted price for a buyer who wants Oakland city access?",
+    "median_income": 8.3252,
+    "house_age": 41.0,
+    "average_rooms": 6.984127,
+    "average_bedrooms": 1.02381,
+    "population": 322.0,
+    "average_occupancy": 2.555556,
+    "latitude": 37.809,
+    "longitude": -122.257
+  }'
+```
 
+### Structured Property Search
+```bash
+curl "http://127.0.0.1:8000/search-properties?city=Oakland&max_price_usd=900000&limit=5"
+```
+
+### Natural-Language Property Search
 ```bash
 curl -X POST "http://127.0.0.1:8000/search-properties/query" \
   -H "Content-Type: application/json" \
@@ -204,15 +255,7 @@ curl -X POST "http://127.0.0.1:8000/search-properties/query" \
   }'
 ```
 
-The natural-language flow uses Ollama only to parse the request into structured filters. The actual property retrieval still happens through PostgreSQL filters, which keeps the search deterministic and easy to debug.
-
-The parser now also normalizes common real-estate shorthand before sending the query to the LLM, including:
-- `2 BHK` -> `2 bedroom`
-- `sq ft` / `square feet` -> `sqft`
-- `lakh` / `crore` budgets -> approximate USD values using the configurable `inr_per_usd` value in [configs/search_config.yaml](/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/configs/search_config.yaml)
-
-Property recommendation and explanation:
-
+### Listing Recommendation
 ```bash
 curl -X POST "http://127.0.0.1:8000/search-properties/recommend" \
   -H "Content-Type: application/json" \
@@ -222,26 +265,64 @@ curl -X POST "http://127.0.0.1:8000/search-properties/recommend" \
   }'
 ```
 
-This route:
-- parses the natural-language query into structured filters
-- fetches matching listings from PostgreSQL
-- asks Ollama to explain the matched rows only
-- returns both the listings and a grounded recommendation summary
+## How Search Works
+- User writes a natural-language search query
+- Query is normalized:
+  - `2 BHK` -> `2 bedroom`
+  - `sq ft` -> `sqft`
+  - `lakh` / `crore` -> approximate USD
+- Ollama parses the query into structured filters
+- PostgreSQL runs the actual search
+- If exact matches do not exist, fallback logic returns closest matches
 
-If no exact matches are found under the requested budget, the query-based search flows now return:
-- `match_strategy: "closest_match"`
-- a short `advisory_note`
-- the nearest higher-priced alternatives that still satisfy the other filters
+This keeps search deterministic because the database, not the LLM, is the source of truth.
 
-## Observability
-The API now emits structured JSON logs for:
-- application startup
+## Monitoring Snapshot
+Endpoint:
+
+```bash
+curl http://127.0.0.1:8000/monitoring/summary
+```
+
+It shows:
+- total API requests
+- average response time
+- prediction record count
+- property listing count
+- saved model RMSE
+- RAG document count
+
+How `total cities` is computed in evaluation:
+- the backend groups the `property_listings` table by `city`
+- builds one row per city
+- returns `len(cities)` as `total_cities`
+
+This logic lives in [src/monitoring/service.py](/Volumes/NIKHILESH/Projects/real-estate-ai-advisor/real-estate-ai-platform/src/monitoring/service.py), inside `build_inventory_evaluation_summary()`.
+
+## Evaluation Snapshot
+Endpoint:
+
+```bash
+curl http://127.0.0.1:8000/evaluation/summary
+```
+
+It shows:
+- model MAE
+- model R²
+- number of cities covered by demo inventory
+- number of RAG chunks available
+
+This gives a quick “how trustworthy is the system right now?” view.
+
+## Logging and Observability
+The API emits structured JSON logs for:
+- startup
 - every HTTP request
-- prediction creation events
+- prediction creation
 - prediction history fetches
-- prediction/database failures
+- failures
 
-Typical logged fields include:
+Typical fields include:
 - `method`
 - `path`
 - `status_code`
@@ -249,193 +330,52 @@ Typical logged fields include:
 - `prediction_id`
 - `model_name`
 
-Lightweight monitoring/evaluation endpoints are also available:
-
-```bash
-curl http://127.0.0.1:8000/monitoring/summary
-curl http://127.0.0.1:8000/evaluation/summary
-```
-
-These expose:
-- runtime request/error counters
-- database inventory counts
-- current model metrics from saved artifacts
-- RAG index metadata
-- city-level property inventory summary
-
-## Next Improvement Ideas
-- Add a dedicated PostgreSQL prediction log
-- Add geospatial features or neighborhood clustering
-- Try stricter clipping or additional geo features if XGBoost plateaus
-- Package the app with Docker
-
 ## Docker
-Run the full API + PostgreSQL stack with Docker:
+Run API + PostgreSQL:
 
 ```bash
 docker compose up --build
 ```
 
-This starts:
-- `api` on `http://127.0.0.1:8000`
-- `db` on `localhost:5432`
-
-The Docker image disables Uvicorn's default access log so the structured JSON application logs are easier to read.
-
-Inside Docker, the API uses:
-
-```env
-DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/real_estate_db
-```
+Services:
+- API: `http://127.0.0.1:8000`
+- Postgres: `localhost:5432`
 
 Useful commands:
 
 ```bash
-docker compose up --build
 docker compose down
 docker compose down -v
 ```
 
-Use `docker compose down -v` only if you want to remove the Postgres volume and reset stored prediction history.
-
-## Alembic Migrations
-Use Alembic for production-style schema management.
-
-Create or upgrade the database schema:
+## Testing
+Run tests:
 
 ```bash
-alembic upgrade head
+python -m pytest
 ```
 
-Create a new migration later:
+Or just API tests:
 
 ```bash
-alembic revision -m "describe_change"
+python -m pytest tests/test_api.py
 ```
 
-For local convenience, the API can still auto-create tables on startup. To disable that and rely only on migrations:
+## Current Status
+This project includes:
+- ML training and evaluation
+- experiment tracking
+- inference API
+- PostgreSQL persistence
+- natural-language property search
+- RAG + Ollama advisory flows
+- monitoring/evaluation views
+- frontend demo
+- Docker support
 
-```env
-AUTO_CREATE_TABLES=false
-```
-
-## CI/CD
-A minimal GitHub Actions workflow is included at:
-- `.github/workflows/ci.yml`
-
-It currently:
-- installs dependencies
-- runs `pytest`
-- builds the Docker image
-
-## Notebooks
-Keep notebook work separated by purpose:
-- `notebooks/01_eda.ipynb`: data understanding and skew/outlier analysis
-- `notebooks/02_model_comparison.ipynb`: baseline model comparison
-- `notebooks/03_tuned_xgboost.ipynb`: XGBoost tuning and best-model export
-- `notebooks/04_rag_corpus_and_retrieval.ipynb`: build and inspect the local knowledge index
-- `notebooks/05_ollama_rag_qa.ipynb`: test market Q&A over retrieved context
-- `notebooks/06_property_advisory_rag.ipynb`: combine prediction with conservative market context
-- `notebooks/07_property_search_llm.ipynb`: load listings and test LLM-assisted property search
-- `notebooks/08_property_recommendation.ipynb`: explain and recommend matched property search results
-- `notebooks/09_local_inventory_and_area_rag.ipynb`: reload expanded listings and rebuild/test local area RAG
-- `notebooks/10_property_advisory_local_context.ipynb`: test property advice with nearby demo listing context
-- `notebooks/11_monitoring_and_evaluation.ipynb`: inspect monitoring and evaluation summaries
-
-## RAG Starter
-The project now includes a starter local knowledge corpus built from official California sources so you can begin RAG work without a private dataset.
-
-Starter source documents live in:
-- `data/knowledge/raw`
-
-Initial official sources used:
-- U.S. Census QuickFacts California
-- California Department of Finance population and housing estimates
-- California Department of Finance population projections
-
-Additional local demo context now included:
-- `demo_listing_inventory_snapshot.md`
-- `demo_locality_preference_notes.md`
-
-These local demo docs are derived from the seeded listing inventory and are meant for prototype retrieval quality, not official market research.
-
-Property advisory now also uses nearby seeded listings as local demo context when possible. This helps the model compare the predicted estimate against approximate nearby inventory, while still treating that inventory as demo context rather than official comparable-sale evidence.
-
-Build the local vector index:
-
-```bash
-python -m src.rag.build_index
-```
-
-After adding or editing local knowledge docs, rebuild the index before testing advisory flows again.
-
-Run a simple retrieval test:
-
-```bash
-python -m src.rag.retrieve
-```
-
-Core RAG files:
-- `configs/rag_config.yaml`
-- `src/rag/document_loader.py`
-- `src/rag/chunking.py`
-- `src/rag/embeddings.py`
-- `src/rag/build_index.py`
-- `src/rag/retrieve.py`
-
-## Ollama RAG
-The project now includes a local Ollama-backed advisory layer.
-
-Current default local model:
-- `qwen2.5:14b`
-
-Make sure Ollama is running, then build the index:
-
-```bash
-python -m src.rag.build_index
-```
-
-Run a simple local generation test:
-
-```bash
-python -m src.rag.retrieve
-```
-
-Use the new API endpoint:
-
-```bash
-curl -X POST "http://127.0.0.1:8000/ask-market" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "question": "What official statewide facts support the view that California housing affordability is under pressure?"
-  }'
-```
-
-Notebook flow:
-- `notebooks/04_rag_corpus_and_retrieval.ipynb`
-- `notebooks/05_ollama_rag_qa.ipynb`
-- `notebooks/06_property_advisory_rag.ipynb`
-
-## Property Advisory RAG
-The project now supports a property-level advisory flow that combines:
-- tuned XGBoost price prediction
-- retrieved official housing context
-- Ollama-generated explanation
-
-API endpoint:
-
-```bash
-curl -X POST "http://127.0.0.1:8000/advise-property" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "question": "How should I interpret this predicted price in market context?",
-    "median_income": 8.3252,
-    "house_age": 41.0,
-    "average_rooms": 6.984127,
-    "average_bedrooms": 1.02381,
-    "population": 322.0,
-    "average_occupancy": 2.555556,
-    "latitude": 37.88,
-    "longitude": -122.23
-  }'
-```
+## Next Improvements
+- Replace seed listings with a more realistic external/open dataset
+- Expand local area knowledge for stronger property advice
+- Add richer monitoring dashboards or persistence
+- Add stronger evaluation reports for search/RAG quality
+- Polish deployment and production setup
